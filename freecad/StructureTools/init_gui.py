@@ -19,7 +19,7 @@ class StructureTools(Gui.Workbench):
     """
     MenuText = translate("Workbench", "StructureTools")
     ToolTip = translate("Workbench", "a simple StructureTools")
-    Icon = os.path.join(ICONPATH, "icon.svg")
+    Icon = os.path.join(ICONPATH, "icone.svg")
     toolbox = []
 
     def GetClassName(self):

@@ -14,5 +14,5 @@ setup(name='freecad.StructureTools',
       maintainer_email="eng.maykowmenezes@gmail.com",
       url="https://www.patreon.com/c/StructureTools",
       description="Workbench for 2d and 3d structural analysis",
-      install_requires=[['numpy','scipy','prettytable','PyniteFEA']],
+      install_requires=['numpy','scipy','prettytable','PyniteFEA'],
       include_package_data=True)

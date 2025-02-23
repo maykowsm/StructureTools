@@ -1,0 +1,32 @@
+# References: 
+# https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
+# https://packaging.python.org/en/latest/guides/packaging-namespace-packages/#native-namespace-packages
+# https://packaging.python.org/en/latest/guides/single-sourcing-package-version/
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "freecad.StructureTools"
+dynamic = ["version"]
+description = "Workbench for 2d and 3d structural analysis"
+readme = "README.md"
+license = {file = "LICENSE"}
+maintainers = [
+    {name = "Maykow Menezes", email = "eng.maykowmenezes@gmail.com"
+    },
+]
+requires-python = ">=3.8"
+dependencies = ["['numpy','scipy','prettytable','PyniteFEA']"]
+
+[project.urls]
+source = "https://www.patreon.com/c/StructureTools"
+
+[tool.setuptools]
+packages = ["freecad", "freecad.StructureTools"]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "freecad.StructureTools.__version__"}

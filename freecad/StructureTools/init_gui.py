@@ -31,16 +31,17 @@ class StructureTools(Gui.Workbench):
         here is the place to import all the commands
         """
 
-        App.Console.PrintMessage(translate(
-            "Log",
-            "Switching to StructureTools") + "\n")
-        App.Console.PrintMessage(translate(
-            "Log",
-            "Run a numpy function:") + "sqrt(100) = {}\n".format(my_numpy_function.my_foo(100)))
+        # App.Console.PrintMessage(translate(
+        #     "Log",
+        #     "Switching to StructureTools") + "\n")
+        # App.Console.PrintMessage(translate(
+        #     "Log",
+        #     "Run a numpy function:") + "sqrt(100) = {}\n".format(my_numpy_function.my_foo(100)))
+        from freecad.StructureTools import load
 
         # NOTE: Context for this commands must be "Workbench"
-        self.appendToolbar(QT_TRANSLATE_NOOP("Workbench", "Tools"), self.toolbox)
-        self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "Tools"), self.toolbox)
+        self.appendToolbar('StructureTools', ["load"])
+        self.appendMenu('StructureTools',["load"])
 
     def Activated(self):
         '''

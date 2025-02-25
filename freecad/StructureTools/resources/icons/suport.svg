@@ -8,7 +8,7 @@
    version="1.1"
    id="svg1"
    inkscape:version="1.4 (1:1.4+202410161351+e7c3feb100)"
-   sodipodi:docname="Supports.svg"
+   sodipodi:docname="suport.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -24,14 +24,14 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="12.300898"
-     inkscape:cx="26.50213"
-     inkscape:cy="25.160765"
-     inkscape:window-width="1758"
-     inkscape:window-height="991"
-     inkscape:window-x="26"
-     inkscape:window-y="23"
-     inkscape:window-maximized="0"
+     inkscape:zoom="6.150449"
+     inkscape:cx="10.649629"
+     inkscape:cy="35.200682"
+     inkscape:window-width="2560"
+     inkscape:window-height="1043"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <defs
      id="defs1">
@@ -39,7 +39,7 @@
        id="linearGradient4"
        inkscape:collect="always">
       <stop
-         style="stop-color:#578fff;stop-opacity:1;"
+         style="stop-color:#73f073;stop-opacity:1;"
          offset="0"
          id="stop4" />
       <stop
@@ -53,9 +53,10 @@
        id="linearGradient5"
        x1="6.0141845"
        y1="5.4619555"
-       x2="5.1051226"
-       y2="5.9064469"
-       gradientUnits="userSpaceOnUse" />
+       x2="5.0405946"
+       y2="6.0785213"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-0.00204173,-2.1820841)" />
   </defs>
   <g
      inkscape:label="Camada 1"
@@ -96,10 +97,11 @@
        inkscape:transform-center-y="0.41820236"
        transform="matrix(1.2731067,0,0,2.2791556,3.7844249,5.3243973)" />
     <g
-       id="g2">
+       id="g2"
+       transform="translate(-0.00204173,-2.1820841)">
       <path
          sodipodi:type="star"
-         style="fill:#1966ff;stroke:#000000;stroke-width:0.186201;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+         style="fill:#00ab00;fill-opacity:1;stroke:#000000;stroke-width:0.186201;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
          id="path1"
          inkscape:flatsided="true"
          sodipodi:sides="3"
@@ -114,23 +116,18 @@
          d="m 7.1944652,5.4523537 -5.6991855,0 2.8495928,-4.93563937 z"
          inkscape:transform-center-y="-1.0096868"
          transform="matrix(1.437901,0,0,1.227424,-2.014163,1.6621189)" />
-      <circle
-         style="fill:#1966ff;stroke:#000000;stroke-width:0.225357;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-         id="path2"
-         cx="4.2333336"
-         cy="1.3179828"
-         r="0.97836363" />
-      <circle
-         style="fill:#578fff;fill-opacity:1;stroke:none;stroke-width:0.0849645;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-         id="path2-5"
-         cx="4.5869508"
-         cy="1.039286"
-         r="0.36886346" />
     </g>
     <path
        style="fill:url(#linearGradient5);fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 7.7947919,8.1141883 4.2335766,2.8097228 4.5171771,7.7567686 Z"
+       d="M 7.7927502,5.9321042 4.2315349,0.62763869 4.5151354,5.5746845 Z"
        id="path3"
        sodipodi:nodetypes="cccc" />
+    <rect
+       style="fill:#00ab00;stroke:#000000;stroke-width:0.247;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;stroke-dasharray:none;fill-opacity:1"
+       id="rect1"
+       width="8.2184734"
+       height="0.71296668"
+       x="0.12409648"
+       y="6.7953491" />
   </g>
 </svg>

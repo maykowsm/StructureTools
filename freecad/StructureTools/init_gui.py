@@ -1,7 +1,6 @@
 import os
 import FreeCADGui as Gui
 import FreeCAD as App
-from freecad. StructureTools import my_numpy_function
 
 translate=App.Qt.translate
 QT_TRANSLATE_NOOP=App.Qt.QT_TRANSLATE_NOOP
@@ -30,23 +29,21 @@ class StructureTools(Gui.Workbench):
         This function is called at the first activation of the workbench.
         here is the place to import all the commands
         """
-
-        # App.Console.PrintMessage(translate(
-        #     "Log",
-        #     "Switching to StructureTools") + "\n")
-        # App.Console.PrintMessage(translate(
-        #     "Log",
-        #     "Run a numpy function:") + "sqrt(100) = {}\n".format(my_numpy_function.my_foo(100)))
         from freecad.StructureTools import load
+        from freecad.StructureTools import suport
+
+        
 
         # NOTE: Context for this commands must be "Workbench"
-        self.appendToolbar('StructureTools', ["load"])
-        self.appendMenu('StructureTools',["load"])
+        self.appendToolbar('StructureTools', ["load", "suport"])
+        self.appendMenu('StructureTools',["load", "suport"])
 
     def Activated(self):
         '''
         code which should be computed when a user switch to this workbench
         '''
+        
+
         App.Console.PrintMessage(translate(
             "Log",
             "Workbench StructureTools activated.") + "\n")

@@ -17,10 +17,10 @@ class Profile:
         obj.Proxy = self
         obj.addProperty("App::PropertyLinkSubList", "ObjectBase", "Base", "Object base")
 
-        obj.addProperty("App::PropertyFloat", "InertiaY", "Profile", "Inertia in the local Y axis").InertiaY = 0.00
-        obj.addProperty("App::PropertyFloat", "InertiaZ", "Profile", "Inertia in the local Z axis").InertiaZ = 0.00
-        obj.addProperty("App::PropertyFloat", "InertiaT", "Profile", "Inertia torsion or J ").InertiaT = 0.00
-        obj.addProperty("App::PropertyFloat", "Area", "Profile", "Section area").Area = 0.00
+        obj.addProperty("App::PropertyFloat", "MomentInertiaY", "Profile", "Inertia in the local Y axis").MomentInertiaY = 0.00
+        obj.addProperty("App::PropertyFloat", "MomentInertiaZ", "Profile", "Inertia in the local Z axis").MomentInertiaZ = 0.00
+        obj.addProperty("App::PropertyFloat", "TorcionalConstant", "Profile", "Inertia torsion or J ").TorcionalConstant = 0.00
+        obj.addProperty("App::PropertyFloat", "AreaSection", "Profile", "Section area").AreaSection = 0.00
 
 
     def execute(self, obj): 

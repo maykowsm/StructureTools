@@ -32,12 +32,13 @@ class StructureTools(Gui.Workbench):
         from freecad.StructureTools import load
         from freecad.StructureTools import suport
         from freecad.StructureTools import profile
+        from freecad.StructureTools import material
 
         
 
         # NOTE: Context for this commands must be "Workbench"
-        self.appendToolbar('StructureTools', ["load", "suport", "profile"])
-        self.appendMenu('StructureTools',["load", "suport", "profile"])
+        self.appendToolbar('StructureTools', ["load", "suport", "profile", "material"])
+        self.appendMenu('StructureTools',["load", "suport", "profile", "material"])
 
     def Activated(self):
         '''

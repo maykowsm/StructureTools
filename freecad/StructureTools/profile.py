@@ -304,7 +304,7 @@ class CommandProfile():
 
     def Activated(self):
         doc = FreeCAD.ActiveDocument
-        obj = doc.addObject("Part::FeaturePython", "Suport")
+        obj = doc.addObject("Part::FeaturePython", "Profile")
 
         Profile(obj)
         ViewProviderProfile(obj.ViewObject)

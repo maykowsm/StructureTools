@@ -430,7 +430,7 @@ class CommandMaterial():
 
     def Activated(self):
         doc = FreeCAD.ActiveDocument
-        obj = doc.addObject("Part::FeaturePython", "Suport")
+        obj = doc.addObject("Part::FeaturePython", "Material")
 
         Material(obj)
         ViewProviderMaterial(obj.ViewObject)

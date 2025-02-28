@@ -19,12 +19,14 @@ class CommandMember():
 
     def GetResources(self):
         return {"Pixmap"  : os.path.join(ICONPATH, "icons/member.svg"), # the name of a svg file available in the resources
-                "Accel"   : "Shift+B", # a default shortcut (optional)
+                "Accel"   : "Shift+D", # a default shortcut (optional)
                 "MenuText": "Define Member",
                 "ToolTip" : "Defines the members of the structure"}
 
     def Activated(self):
-        selections = FreeCADGui.Selection.getSelection()       
+        selections = FreeCADGui.Selection.getSelection()
+        selection = list(filter(lambda element: 'Wire' in element.Name or 'Line' in element.Name))
+             
         for selection in selections:
             selection.addProperty('App::PropertyLink', 'MaterialMember', 'Structure','Member material')
             selection.addProperty('App::PropertyLink', 'ProfileMember', 'Structure','Member profile')

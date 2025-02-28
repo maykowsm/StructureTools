@@ -12,11 +12,10 @@ def show_error_message(msg):
     msg_box.exec_()
 
 
-class Load:
+class LoadDistributed:
     def __init__(self, obj, selection):
         obj.Proxy = self
         obj.addProperty("App::PropertyLinkSubList", "ObjectBase", "Base", "Object base")
-        obj.addProperty("App::PropertyForce", "NodalLoading", "Nodal", "Nodal loading").NodalLoading = 10000000
         obj.addProperty("App::PropertyForce", "InitialLoading", "Distributed", "Initial loading (load per unit length)").InitialLoading = 10000000
         obj.addProperty("App::PropertyForce", "FinalLoading", "Distributed", "Final loading (load per unit length)").FinalLoading = 10000000
         obj.addProperty("App::PropertyFloat", "ScaleDraw", "Load", "Scale from drawing").ScaleDraw = 1
@@ -108,27 +107,7 @@ class Load:
             shape.translate(subelement.Vertexes[0].Point)
             obj.ViewObject.ShapeAppearance = (FreeCAD.Material(DiffuseColor=(0.00,0.00,1.00),AmbientColor=(0.33,0.33,0.33),SpecularColor=(0.53,0.53,0.53),EmissiveColor=(0.00,0.00,0.00),Shininess=(0.90),Transparency=(0.00),))
             obj.Label = 'distributed load'
-        else:
-            # Desenha carregamento pontual 
-            shape = self.makeArrow(obj, obj.NodalLoading)
-            
-            match obj.GlobalDirection:
-                case '+X':
-                    shape.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(0,1,0), -90)
-                case '-X':
-                    shape.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(0,1,0), 90)
-                case '+Y':
-                    shape.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,0,0), 90)
-                case '-Y':
-                    shape.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,0,0), -90)
-                case '+Z':
-                    shape.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,0,0), 180)
-                case '-Z':
-                    shape.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,0,0), 0)
-            
-            shape.translate(subelement.Point)
-            obj.ViewObject.ShapeAppearance = (FreeCAD.Material(DiffuseColor=(1.00,0.00,0.00),AmbientColor=(0.33,0.33,0.33),SpecularColor=(0.53,0.53,0.53),EmissiveColor=(0.00,0.00,0.00),Shininess=(0.90),Transparency=(0.00),))
-            obj.Label = 'nodal load'
+
 
         obj.Placement = shape.Placement
         obj.Shape = shape
@@ -143,7 +122,7 @@ class Load:
             self.execute(obj)
     
 
-class ViewProviderLoad:
+class ViewProviderLoadDistributed:
     def __init__(self, obj):
         obj.Proxy = self
     
@@ -151,68 +130,58 @@ class ViewProviderLoad:
     def getIcon(self):
         return """
                /* XPM */
-static char * load_xpm[] = {
-"32 32 18 1",
+static char * load_distributed_xpm[] = {
+"32 32 8 1",
 " 	c None",
-".	c #FF1919",
-"+	c #1965FF",
-"@	c #1966FF",
-"#	c #1A65FF",
-"$	c #2961F0",
-"%	c #E8202F",
-"&	c #1866FF",
-"*	c #1A66FF",
-"=	c #1865FF",
-"-	c #2E60EB",
-";	c #EE1E29",
-">	c #FF1A1A",
-",	c #1A67FF",
-"'	c #1967FF",
-")	c #1B66FF",
-"!	c #1867FF",
-"~	c #FF1818",
-"               ..               ",
-"               ..               ",
-"               ..               ",
-"               ..               ",
-"               ..               ",
-"               ..               ",
-"               ..               ",
-"               ..               ",
-"               ..               ",
-"  +@@@@@#++@@@$.%@@@@@+&@@@@*+  ",
-"  @=++++@@*+++-.;++++*@@++++@@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@     ..     @@    @@  ",
-"  @+    @@   >.....   @@    @@  ",
-"  @+    @@    ....    @@    @@  ",
-"*,=**  *+='   ....   )=+*  *!=!*",
-" @@@@  @@@@   ~...   @@@@  @@@@,",
-" @@@@  '@@@    ..>   @@@&  ,@@@ ",
-" @@@    @@*    ..    =@@    @@@ ",
-"  @*    &@     ..     @@    +@  ",
-"  @      @      ~     @=     @  ",
-"  *                          @  "};
+".	c #1966FF",
+"+	c #1866FF",
+"@	c #1A66FF",
+"#	c #1A67FF",
+"$	c #1965FF",
+"%	c #1A65FF",
+"&	c #1967FF",
+"                                ",
+"                                ",
+"                                ",
+"  ...........................+  ",
+"  ............................  ",
+"  ............................  ",
+"  ...@        #..@        @...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  ...$         ...        $...  ",
+"  %...        &..&        %..@  ",
+"$......$    #.......    $......#",
+" ......      ......$     ...... ",
+" +.....      &.....      ...... ",
+"  ....$       ....$      $....  ",
+"  @...        ....        ....  ",
+"  $..+        #..@        ...#  ",
+"   ..          ...         ..   ",
+"   ..          ..          ..   ",
+"   $$           +          $.   ",
+"                                "};
         """
 
 
-class CommandLoad():
+class CommandLoadDistributed():
     """My new command"""
 
     def GetResources(self):
-        return {"Pixmap"  : os.path.join(ICONPATH, "icons/load.svg"), # the name of a svg file available in the resources
+        return {"Pixmap"  : os.path.join(ICONPATH, "icons/load_distributed.svg"), # the name of a svg file available in the resources
                 "Accel"   : "Shift+L", # a default shortcut (optional)
-                "MenuText": "Load",
+                "MenuText": "Distributed Load",
                 "ToolTip" : "Adds loads to the structure"}
 
     def Activated(self):
@@ -222,10 +191,10 @@ class CommandLoad():
                 for subSelectionname in selection.SubElementNames:
 
                     doc = FreeCAD.ActiveDocument
-                    obj = doc.addObject("Part::FeaturePython", "Load")
+                    obj = doc.addObject("Part::FeaturePython", "Load_Distributed")
 
-                    objLoad = Load(obj,(selection.Object, subSelectionname))
-                    ViewProviderLoad(obj.ViewObject)
+                    objLoad = LoadDistributed(obj,(selection.Object, subSelectionname))
+                    ViewProviderLoadDistributed(obj.ViewObject)
             
             FreeCAD.ActiveDocument.recompute()
         except:
@@ -237,4 +206,4 @@ class CommandLoad():
         are met or not. This function is optional."""
         return True
 
-FreeCADGui.addCommand("load", CommandLoad())
+FreeCADGui.addCommand("load_distributed", CommandLoadDistributed())

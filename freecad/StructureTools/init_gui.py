@@ -29,7 +29,8 @@ class StructureTools(Gui.Workbench):
         This function is called at the first activation of the workbench.
         here is the place to import all the commands
         """
-        from freecad.StructureTools import load
+        from freecad.StructureTools import load_distributed
+        from freecad.StructureTools import load_nodal
         from freecad.StructureTools import suport
         from freecad.StructureTools import profile
         from freecad.StructureTools import material
@@ -38,8 +39,9 @@ class StructureTools(Gui.Workbench):
         
 
         # NOTE: Context for this commands must be "Workbench"
-        self.appendToolbar('StructureTools', ["load","member", "suport", "profile", "material"])
-        self.appendMenu('StructureTools',["load","member" ,"suport", "profile", "material"])
+        self.appendToolbar('Structure_Load', ["load_distributed","load_nodal"])
+        self.appendToolbar('StructureTools', ["member", "suport", "profile", "material"])
+        self.appendMenu('StructureTools',["load_distributed", "load_nodal","member" ,"suport", "profile", "material"])
 
     def Activated(self):
         '''

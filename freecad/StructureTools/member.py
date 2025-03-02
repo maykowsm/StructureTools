@@ -25,7 +25,7 @@ class CommandMember():
 
     def Activated(self):
         selections = FreeCADGui.Selection.getSelection()
-        selection = list(filter(lambda element: 'Wire' in element.Name or 'Line' in element.Name))
+        selection = list(filter(lambda element: 'Wire' in element.Name or 'Line' in element.Name, selections ))
              
         for selection in selections:
             selection.addProperty('App::PropertyLink', 'MaterialMember', 'Structure','Member material')

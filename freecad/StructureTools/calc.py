@@ -145,12 +145,19 @@ class Calc:
 		return model
 
 	# Cria os suportes
-	def setSuports(self, model, suports):
+	def setSuports(self, model, suports, nodes_map):
 		for suport in suports:
-
-			subname = int(suport.ObjectBase[0][1][0].split('Vertex')[1]) - 1
-			name = str(subname)
-			model.def_support(name, suport.FixTranslationX, suport.FixTranslationZ, suport.FixTranslationY, suport.FixRotationX, suport.FixRotationZ, suport.FixRotationY)
+			suportvertex = list(suport.ObjectBase[0][0].Shape.Vertexes[int(suport.ObjectBase[0][1][0].split('Vertex')[1])-1].Point)
+			print(suportvertex)
+			for i, node in enumerate(nodes_map):
+				print(node)
+				if round(suportvertex[0],2) == round(node[0],2) and round(suportvertex[1],2) == round(node[2],2) and round(suportvertex[2],2) == round(node[1],2):
+					
+					print(i)
+					# subname = int(suport.ObjectBase[0][1][0].split('Vertex')[1]) - 1
+					name = str(i)
+					model.def_support(name, suport.FixTranslationX, suport.FixTranslationZ, suport.FixTranslationY, suport.FixRotationX, suport.FixRotationZ, suport.FixRotationY)
+					break
 		
 		return model
 
@@ -194,7 +201,7 @@ class Calc:
 		model = self.setNodes(model, nodes_map)
 		model = self.setMembers(model, members_map)
 		model = self.setLoads(model, loads)
-		model = self.setSuports(model, suports)
+		model = self.setSuports(model, suports, nodes_map)
 
 		model.analyze()
 

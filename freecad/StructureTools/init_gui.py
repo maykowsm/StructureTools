@@ -36,6 +36,8 @@ class StructureTools(Gui.Workbench):
         from freecad.StructureTools import material
         from freecad.StructureTools import member
         from freecad.StructureTools import calc
+        import DraftTools
+
 
         
 

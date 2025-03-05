@@ -24,6 +24,7 @@ class Calc:
 
 		obj.addProperty("App::PropertyStringList", "NameMembers", "Calc", "name of structure members")
 		obj.addProperty("App::PropertyVectorList", "Nodes", "Calc", "nós")
+		obj.addProperty("App::PropertyFloatList", "RotationSection", "Calc", "rotação da seção")
 
 		obj.addProperty("App::PropertyStringList", "MomentY", "ResultMoment", "momento em Y local")
 		obj.addProperty("App::PropertyStringList", "MomentZ", "ResultMoment", "momento em Z local")
@@ -80,7 +81,9 @@ class Calc:
 				listMembers[element.Name + '_' + str(i)] = {
 					'nodes': [str(listIndexVertex[0]), str(listIndexVertex[1])],
 					'material': element.MaterialMember.Name,
-					'profile': element.ProfileMember.Name}
+					'profile': element.ProfileMember.Name,
+					'rotationSection': float(element.RotationSection)
+					}
 		
 		return listMembers
 
@@ -93,8 +96,9 @@ class Calc:
 
 	# Cria os membros no modelo do solver
 	def setMembers(self, model, members_map):
+		listRotationSection = []
 		for memberName in list(members_map):
-			model.add_member(memberName, members_map[memberName]['nodes'][0] , members_map[memberName]['nodes'][1], members_map[memberName]['material'], members_map[memberName]['profile'])
+			model.add_member(memberName, members_map[memberName]['nodes'][0] , members_map[memberName]['nodes'][1], members_map[memberName]['material'], members_map[memberName]['profile'], rotation=members_map[memberName]['rotationSection'])
 
 		return model
 
@@ -148,13 +152,8 @@ class Calc:
 	def setSuports(self, model, suports, nodes_map):
 		for suport in suports:
 			suportvertex = list(suport.ObjectBase[0][0].Shape.Vertexes[int(suport.ObjectBase[0][1][0].split('Vertex')[1])-1].Point)
-			print(suportvertex)
 			for i, node in enumerate(nodes_map):
-				print(node)
 				if round(suportvertex[0],2) == round(node[0],2) and round(suportvertex[1],2) == round(node[2],2) and round(suportvertex[2],2) == round(node[1],2):
-					
-					print(i)
-					# subname = int(suport.ObjectBase[0][1][0].split('Vertex')[1]) - 1
 					name = str(i)
 					model.def_support(name, suport.FixTranslationX, suport.FixTranslationZ, suport.FixTranslationY, suport.FixRotationX, suport.FixRotationZ, suport.FixRotationY)
 					break

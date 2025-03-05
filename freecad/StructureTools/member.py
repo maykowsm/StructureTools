@@ -30,7 +30,7 @@ class CommandMember():
         for selection in selections:
             selection.addProperty('App::PropertyLink', 'MaterialMember', 'Structure','Member material')
             selection.addProperty('App::PropertyLink', 'ProfileMember', 'Structure','Member profile')
-            selection.addProperty('App::PropertyAngle', 'RotationProfile', 'Structure','Member profile rotation')
+            selection.addProperty('App::PropertyAngle', 'RotationSection', 'Structure','Member profile rotation')
         FreeCAD.ActiveDocument.recompute()        
 
         return

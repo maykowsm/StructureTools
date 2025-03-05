@@ -1,7 +1,7 @@
 import FreeCAD, Part
 from functools import lru_cache
 
-BASE_ARROWS_DIM = {'radius_cylinder': 2, 'base_radius_cone' : 12, 'height_cone':30,}
+BASE_ARROWS_DIM = {'radius_cylinder': 5, 'base_radius_cone' : 15, 'height_cone':75}
 DIST_BET_ARROWS = 30 * 4
 
 

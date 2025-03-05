@@ -148,9 +148,7 @@ class Calc:
 	def setSuports(self, model, suports, nodes_map):
 		for suport in suports:
 			suportvertex = list(suport.ObjectBase[0][0].Shape.Vertexes[int(suport.ObjectBase[0][1][0].split('Vertex')[1])-1].Point)
-			print(suportvertex)
 			for i, node in enumerate(nodes_map):
-				print(node)
 				if round(suportvertex[0],2) == round(node[0],2) and round(suportvertex[1],2) == round(node[2],2) and round(suportvertex[2],2) == round(node[1],2):
 					
 					print(i)

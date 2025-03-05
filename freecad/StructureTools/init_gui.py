@@ -38,18 +38,17 @@ class StructureTools(Gui.Workbench):
         from freecad.StructureTools import calc
         import DraftTools
 
-
-        
-
         # NOTE: Context for this commands must be "Workbench"
         self.appendToolbar('DraftDraw', ["Draft_Line", "Draft_Wire", "Draft_ArcTools", "Draft_BSpline"])
-        self.appendToolbar('DraftSnap', ["Draft_Snap_Lock", "Draft_Snap_Endpoint", "Draft_Snap_Midpoint", "Draft_Snap_Center", "Draft_Snap_Angle", "Draft_Snap_Intersection", "Draft_Snap_Perpendicular", "Draft_Snap_Extension", "Draft_Snap_Parallel", "Draft_Snap_Special", "Draft_Snap_Near", "Draft_Snap_Ortho", "Draft_Snap_Grid", "Draft_Snap_WorkingPlane", "Draft_Snap_Dimensions", "Draft_ToggleGrid"])
-        self.appendToolbar('DraftTools', ["Draft_SelectPlane", "Draft_SetStyle"])
-
+        
         self.appendToolbar('StructureLoad', ["load_distributed","load_nodal"])
         self.appendToolbar('StructureTools', ["member", "suport", "profile", "material"])
         self.appendToolbar('StructureResults', ["calc"])
         self.appendMenu('StructureTools',["load_distributed", "load_nodal","member" ,"suport", "profile", "material", "calc"])
+        
+        self.appendToolbar('DraftSnap', ["Draft_Snap_Lock", "Draft_Snap_Endpoint", "Draft_Snap_Midpoint", "Draft_Snap_Center", "Draft_Snap_Angle", "Draft_Snap_Intersection", "Draft_Snap_Perpendicular", "Draft_Snap_Extension", "Draft_Snap_Parallel", "Draft_Snap_Special", "Draft_Snap_Near", "Draft_Snap_Ortho", "Draft_Snap_Grid", "Draft_Snap_WorkingPlane", "Draft_Snap_Dimensions", "Draft_ToggleGrid"])
+        self.appendToolbar('DraftTools', ["Draft_SelectPlane", "Draft_SetStyle"])
+
 
     def Activated(self):
         '''

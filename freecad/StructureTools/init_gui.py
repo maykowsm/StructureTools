@@ -30,7 +30,7 @@ class StructureTools(Gui.Workbench):
         here is the place to import all the commands
         """
         from freecad.StructureTools import load_distributed
-        from freecad.StructureTools import load_nodal
+        from freecad.StructureTools import load_pontual
         from freecad.StructureTools import suport
         from freecad.StructureTools import profile
         from freecad.StructureTools import material

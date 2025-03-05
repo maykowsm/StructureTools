@@ -1,7 +1,7 @@
 import FreeCAD, App, FreeCADGui, Part, os
 from PySide2 import QtWidgets
 from .utils_func import rotate_to_direction, make_arrow, set_obj_appear, BASE_ARROWS_DIM
-
+from .load_base_class import LoadBaseClass
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "resources")
 
@@ -14,7 +14,7 @@ def show_error_message(msg):
     msg_box.exec_()
 
 
-class LoadNodal:
+class LoadNodal(LoadBaseClass):
     def __init__(self, obj, selection):
         super().__init__(obj, selection)
         obj.addProperty("App::PropertyForce", "NodalLoading", "Pontual", "Nodal loading").NodalLoading = 0

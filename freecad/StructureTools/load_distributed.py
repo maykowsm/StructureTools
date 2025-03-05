@@ -1,5 +1,7 @@
 import FreeCAD, App, FreeCADGui, Part, os
 from PySide2 import QtWidgets
+from .load_base_class import LoadBaseClass
+from .utils_func import rotate_to_direction, make_arrow, set_obj_appear, BASE_ARROWS_DIM
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "resources")
 
@@ -12,111 +14,64 @@ def show_error_message(msg):
     msg_box.exec_()
 
 
-class LoadDistributed:
+class LoadDistributed(LoadBaseClass):
     def __init__(self, obj, selection):
-        obj.Proxy = self
-        obj.addProperty("App::PropertyLinkSubList", "ObjectBase", "Base", "Object base")
+        super().__init__(obj, selection)
+
         obj.addProperty("App::PropertyForce", "InitialLoading", "Distributed", "Initial loading (load per unit length)").InitialLoading = 10000000
+        obj.addProperty("App::PropertyLength","InitialLoadAt","Distributed","Initial Load At(distance from start)").InitialLoadAt= 0
         obj.addProperty("App::PropertyForce", "FinalLoading", "Distributed", "Final loading (load per unit length)").FinalLoading = 10000000
-        obj.addProperty("App::PropertyFloat", "ScaleDraw", "Load", "Scale from drawing").ScaleDraw = 1
-        
-        obj.addProperty("App::PropertyEnumeration", "GlobalDirection","Load","Global direction load")
-        obj.GlobalDirection = ['+X','-X', '+Y','-Y', '+Z','-Z']
-        obj.GlobalDirection = '-Z'
-        
-        print(selection)
-        obj.ObjectBase = (selection[0], selection[1])
+        obj.addProperty("App::PropertyLength","FinalLoadAt","Distributed","Initial Load At(distance from start)")
     
-    # Desenha carregamento pontual
-    def drawNodeLoad(self, obj, vertex):
-        pass
-    
-    # Retorna o subelemento asociado
-    def getSubelement(self, obj, nameSubElement):
-        
-        if 'Edge' in  nameSubElement:
-            index = int(nameSubElement.split('Edge')[1]) - 1
-            return obj.ObjectBase[0][0].Shape.Edges[index]
-        else:
-            index = int(nameSubElement.split('Vertex')[1]) - 1
-            return obj.ObjectBase[0][0].Shape.Vertexes[index]
-
-    # Desenha a forma da seta levando em conta a escala informada
-    def makeArrow(self, obj, load):
-        radiusCone = 5
-        heightCone = 20
-        heightCylinder = 30
-        radiusCylinder = 2
-
-        cone = Part.makeCone(0 ,radiusCone * obj.ScaleDraw * load/1000000, heightCone * obj.ScaleDraw * load/1000000)
-        cylinder = Part.makeCylinder(radiusCylinder * obj.ScaleDraw * load/1000000, heightCylinder * obj.ScaleDraw * load/1000000)        
-        cylinder.translate(FreeCAD.Vector(0,0, heightCone * obj.ScaleDraw * load/1000000))
-        return Part.makeCompound([cone, cylinder])
     
     
     def execute(self, obj):        
         subelement = self.getSubelement(obj, obj.ObjectBase[0][1][0])
-        if 'Edge' in obj.ObjectBase[0][1][0]:
-            k = 1000000
-            nArrow = int(k * (subelement.Length**(1/1.8))/(obj.ScaleDraw * ((obj.InitialLoading + obj.FinalLoading) / 2))) #calcula o numero de setas com base na distancia do menbro, escala do desenho e media das forças de inicio e fim
+        if 'Edge' not in obj.ObjectBase[0][1][0]:
+            return
+        
+        if obj.FinalLoadAt <= obj.InitialLoadAt or obj.InitialLoadAt > subelement.Length:
+            obj.FinalLoadAt = subelement.Length
+            obj.InitialLoadAt = 0
+        
+        if not (obj.FinalLoading != 0 or obj.InitialLoading != 0):
+            obj.FinalLoading = self.base_value
             
+        
+        #calcula o numero de setas com base no tamanho padrao da seta
+        n_arrow = int( (obj.FinalLoadAt-obj.InitialLoadAt) / (obj.ScaleDraw * self.dist_bet_arrows) )
+        dist_bet_arrows = (obj.FinalLoadAt-obj.InitialLoadAt)/n_arrow #recalcula distancias
+        if n_arrow < 3:
+            n_arrow = 3
+        
+        # gera a lista de setas já em suas devidas escalas e nas devidas distancia posicionadas sobre o eixo X
+        list_of_arrows = []            
+        escala = (obj.FinalLoading- obj.InitialLoading)/n_arrow
+        load = obj.InitialLoading
+
+        for coordinades in self.get_arrow_coordinades(n_arrow,subelement, obj.InitialLoadAt, dist_bet_arrows):
             
+            if load.Value == 0:
+                load = load + escala
+                continue
+            arrow = make_arrow(load.Value,**BASE_ARROWS_DIM, scale=obj.ScaleDraw)
+            load = load + escala
+            
+            rotate_to_direction(obj.GlobalDirection, arrow)
+                            
+            arrow.translate(coordinades)
+            list_of_arrows.append(arrow)
 
-            FEend = obj.FinalLoading / obj.InitialLoading #fator de escala entre as forças 'end' e 'start'
-            distEndStart = subelement.Length
-
-            # Gera a lista de pontos 
-            pInit = subelement.Vertexes[0].Point
-            dist = subelement.Length / nArrow
-            distx = (subelement.Vertexes[1].Point.x - subelement.Vertexes[0].Point.x) / nArrow #Calcula a distancia entre cada seta no eixo x
-            disty = (subelement.Vertexes[1].Point.y - subelement.Vertexes[0].Point.y) / nArrow #Calcula a distancia entre cada seta no eixo y
-            distz = (subelement.Vertexes[1].Point.z - subelement.Vertexes[0].Point.z) / nArrow #Calcula a distancia entre cada seta no eixo z
-            listPoints = []
-            for i in range(nArrow + 1):
-                x = distx * i 
-                y = disty * i 
-                z = distz * i 
-                listPoints.append(FreeCAD.Vector(x,y,z))
-
-            # gera a lista de setas já em suas devidas escalas e nas devidas distancia posicionadas sobre o eixo X
-            listArrow = []            
-            for i in range(nArrow + 1):
-                arrowCopy = self.makeArrow(obj, obj.InitialLoading)
-                listArrow.append(arrowCopy)
-                Fe = ((dist * i * (FEend - 1)) / distEndStart)  + 1 #calculo do fator de escala               
-                
-                match obj.GlobalDirection:
-                    case '+X':
-                        arrowCopy.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(0,1,0), -90)
-                    case '-X':
-                        arrowCopy.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(0,1,0), 90)
-                    case '+Y':
-                        arrowCopy.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,0,0), 90)
-                    case '-Y':
-                        arrowCopy.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,0,0), -90)
-                    case '+Z':
-                        arrowCopy.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,0,0), 180)
-                    case '-Z':
-                        arrowCopy.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,0,0), 0)
-                
-                arrowCopy.scale(Fe)
-                arrowCopy.translate(listPoints[i])
-                listArrow.append(arrowCopy)
-
-            shape = Part.makeCompound(listArrow)
-            shape.translate(subelement.Vertexes[0].Point)
-            obj.ViewObject.ShapeAppearance = (FreeCAD.Material(DiffuseColor=(0.00,0.00,1.00),AmbientColor=(0.33,0.33,0.33),SpecularColor=(0.53,0.53,0.53),EmissiveColor=(0.00,0.00,0.00),Shininess=(0.90),Transparency=(0.00),))
-            obj.Label = 'distributed load'
-
+        shape = Part.makeCompound(list_of_arrows)
+        shape.translate(subelement.Vertexes[0].Point)
+        set_obj_appear(obj)
+        obj.Label = 'Distributed load'
 
         obj.Placement = shape.Placement
         obj.Shape = shape
         obj.ViewObject.DisplayMode = 'Shaded'
 
-    def onChanged(self,obj,Parameter):
-        if Parameter == 'edgeLength':
-            self.execute(obj)
-    
+
 
 class ViewProviderLoadDistributed:
     def __init__(self, obj):

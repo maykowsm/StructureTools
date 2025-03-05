@@ -31,6 +31,7 @@ class StructureTools(Gui.Workbench):
         """
         from freecad.StructureTools import load_distributed
         from freecad.StructureTools import load_pontual
+        from freecad.StructureTools import load_momentum
         from freecad.StructureTools import suport
         from freecad.StructureTools import profile
         from freecad.StructureTools import material
@@ -41,7 +42,7 @@ class StructureTools(Gui.Workbench):
         # NOTE: Context for this commands must be "Workbench"
         self.appendToolbar('DraftDraw', ["Draft_Line", "Draft_Wire", "Draft_ArcTools", "Draft_BSpline"])
         
-        self.appendToolbar('StructureLoad', ["load_distributed","load_nodal"])
+        self.appendToolbar('StructureLoad', ["load_distributed","load_nodal", "load_momentum"])
         self.appendToolbar('StructureTools', ["member", "suport", "profile", "material"])
         self.appendToolbar('StructureResults', ["calc"])
         self.appendMenu('StructureTools',["load_distributed", "load_nodal","member" ,"suport", "profile", "material", "calc"])

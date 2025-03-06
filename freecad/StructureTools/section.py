@@ -12,7 +12,7 @@ def show_error_message(msg):
     msg_box.exec_()
 
 
-class Profile:
+class Section:
     def __init__(self, obj):
         obj.Proxy = self
         obj.addProperty("App::PropertyLinkSubList", "ObjectBase", "Base", "Object base")
@@ -24,7 +24,7 @@ class Profile:
 
 
     def execute(self, obj): 
-        obj.Label = 'Profile'       
+        obj.Label = 'Section'       
         pass
         
         
@@ -36,7 +36,7 @@ class Profile:
             self.execute(obj)
     
 
-class ViewProviderProfile:
+class ViewProviderSection:
     def __init__(self, obj):
         obj.Proxy = self
     
@@ -304,10 +304,10 @@ class CommandProfile():
 
     def Activated(self):
         doc = FreeCAD.ActiveDocument
-        obj = doc.addObject("Part::FeaturePython", "Profile")
+        obj = doc.addObject("Part::FeaturePython", "Section")
 
-        Profile(obj)
-        ViewProviderProfile(obj.ViewObject)
+        Section(obj)
+        ViewProviderSection(obj.ViewObject)
         FreeCAD.ActiveDocument.recompute()        
         return
 
@@ -315,4 +315,4 @@ class CommandProfile():
         
         return True
 
-FreeCADGui.addCommand("profile", CommandProfile())
+FreeCADGui.addCommand("section", CommandProfile())

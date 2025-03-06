@@ -33,7 +33,7 @@ class StructureTools(Gui.Workbench):
         from freecad.StructureTools import load_distributed
         from freecad.StructureTools import load_nodal
         from freecad.StructureTools import suport
-        from freecad.StructureTools import profile
+        from freecad.StructureTools import section
         from freecad.StructureTools import material
         from freecad.StructureTools import member
         from freecad.StructureTools import calc
@@ -46,7 +46,7 @@ class StructureTools(Gui.Workbench):
         self.appendToolbar('DraftTools', ["Draft_SelectPlane", "Draft_SetStyle"])
 
         self.appendToolbar('StructureLoad', ["load_distributed","load_nodal"])
-        self.appendToolbar('StructureTools', ["member", "suport", "profile", "material"])
+        self.appendToolbar('StructureTools', ["member", "suport", "section", "material"])
         self.appendToolbar('StructureResults', ["calc"])
         self.appendMenu('StructureTools',["load_distributed", "load_nodal","member" ,"suport", "profile", "material", "calc"])
 

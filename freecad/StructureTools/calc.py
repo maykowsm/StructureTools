@@ -80,7 +80,7 @@ class Calc:
 				listMembers[element.Name + '_' + str(i)] = {
 					'nodes': [str(listIndexVertex[0]), str(listIndexVertex[1])],
 					'material': element.MaterialMember.Name,
-					'profile': element.ProfileMember.Name}
+					'section': element.SectionMember.Name}
 		
 		return listMembers
 
@@ -94,7 +94,7 @@ class Calc:
 	# Cria os membros no modelo do solver
 	def setMembers(self, model, members_map):
 		for memberName in list(members_map):
-			model.add_member(memberName, members_map[memberName]['nodes'][0] , members_map[memberName]['nodes'][1], members_map[memberName]['material'], members_map[memberName]['profile'])
+			model.add_member(memberName, members_map[memberName]['nodes'][0] , members_map[memberName]['nodes'][1], members_map[memberName]['material'], members_map[memberName]['section'])
 
 		return model
 
@@ -149,22 +149,19 @@ class Calc:
 		for suport in suports:
 			suportvertex = list(suport.ObjectBase[0][0].Shape.Vertexes[int(suport.ObjectBase[0][1][0].split('Vertex')[1])-1].Point)
 			for i, node in enumerate(nodes_map):
-				if round(suportvertex[0],2) == round(node[0],2) and round(suportvertex[1],2) == round(node[2],2) and round(suportvertex[2],2) == round(node[1],2):
-					
-					print(i)
-					# subname = int(suport.ObjectBase[0][1][0].split('Vertex')[1]) - 1
+				if round(suportvertex[0],2) == round(node[0],2) and round(suportvertex[1],2) == round(node[2],2) and round(suportvertex[2],2) == round(node[1],2):					
 					name = str(i)
 					model.def_support(name, suport.FixTranslationX, suport.FixTranslationZ, suport.FixTranslationY, suport.FixRotationX, suport.FixRotationZ, suport.FixRotationY)
 					break
 		
 		return model
 
-	def setMaterialAndProfiles(self, model, lines):
+	def setMaterialAndSections(self, model, lines):
 		materiais = []
-		profiles = []
+		sections = []
 		for line in lines:
 			material = line.MaterialMember
-			profile = line.ProfileMember
+			section = line.SectionMember
 
 			if not material.Name in materiais:
 				density = material.Density
@@ -174,13 +171,13 @@ class Calc:
 				model.add_material(material.Name, modulusElasticity, G, poissonRatio, density)
 				materiais.append(material.Name)
 
-			if not profile.Name in profiles:
-				Iy = profile.MomentInertiaY
-				Iz = profile.MomentInertiaZ
-				J  = profile.TorcionalConstant
-				A  = profile.AreaSection
-				model.add_section(profile.Name, A, Iy, Iz, J)
-				profiles.append(profile.Name)
+			if not section.Name in sections:
+				Iy = section.MomentInertiaY
+				Iz = section.MomentInertiaZ
+				J  = section.TorcionalConstant
+				A  = section.AreaSection
+				model.add_section(section.Name, A, Iy, Iz, J)
+				sections.append(section.Name)
 		
 		return model
 
@@ -195,7 +192,7 @@ class Calc:
 		nodes_map = self.mapNodes(lines)
 		members_map = self.mapMembers(lines, nodes_map)
 
-		model = self.setMaterialAndProfiles(model, lines)
+		model = self.setMaterialAndSections(model, lines)
 		model = self.setNodes(model, nodes_map)
 		model = self.setMembers(model, members_map)
 		model = self.setLoads(model, loads)
@@ -285,8 +282,6 @@ class Calc:
 		obj.MinDeflectionZ = minDeflectionz
 		obj.MaxDeflectionY = maxDeflectiony
 		obj.MaxDeflectionZ = maxDeflectionz
-
-		print('---------------------')
 		
 	   
 

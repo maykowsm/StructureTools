@@ -48,7 +48,7 @@ class StructureTools(Gui.Workbench):
         self.appendToolbar('StructureLoad', ["load_distributed","load_nodal"])
         self.appendToolbar('StructureTools', ["member", "suport", "section", "material"])
         self.appendToolbar('StructureResults', ["calc"])
-        self.appendMenu('StructureTools',["load_distributed", "load_nodal","member" ,"suport", "profile", "material", "calc"])
+        self.appendMenu('StructureTools',["load_distributed", "load_nodal","member" ,"suport", "section", "material", "calc"])
 
     def Activated(self):
         '''

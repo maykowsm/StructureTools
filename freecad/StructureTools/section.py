@@ -17,19 +17,44 @@ class Section:
         obj.Proxy = self
         obj.addProperty("App::PropertyLinkSubList", "ObjectBase", "Base", "Object base")
 
-        obj.addProperty("App::PropertyFloat", "MomentInertiaY", "Profile", "Inertia in the local Y axis").MomentInertiaY = 0.00
-        obj.addProperty("App::PropertyFloat", "MomentInertiaZ", "Profile", "Inertia in the local Z axis").MomentInertiaZ = 0.00
-        obj.addProperty("App::PropertyFloat", "TorcionalConstant", "Profile", "Inertia torsion or J ").TorcionalConstant = 0.00
-        obj.addProperty("App::PropertyFloat", "AreaSection", "Profile", "Section area").AreaSection = 0.00
+        obj.addProperty("App::PropertyEnumeration", "SectionType","SectionType","Section type")
+        obj.GlobalDirection = ['generic section','rectangle section','I section', 'T section','U section']
+        obj.GlobalDirection = 'generic section'
+
+        # Dimenções da seção retangular        
+        obj.addProperty("App::PropertyLength", "heightSection", "SectionRetangle", "Height section")
+        obj.addProperty("App::PropertyLength", "widthSection", "SectionRetangle", "Width section")
+
+        # Dimenções da seção I
+        obj.addProperty("App::PropertyLength", "heightSection", "SectionRetangle", "Height section")
+        obj.addProperty("App::PropertyLength", "widthSection", "SectionRetangle", "Width section")
+        
+        # Propriedades da seção
+        obj.addProperty("App::PropertyFloat", "MomentInertiaY", "SectionProprety", "Inertia in the local Y axis").MomentInertiaY = 0.00
+        obj.addProperty("App::PropertyFloat", "MomentInertiaZ", "SectionProprety", "Inertia in the local Z axis").MomentInertiaZ = 0.00
+        obj.addProperty("App::PropertyFloat", "TorcionalConstant", "SectionProprety", "Inertia torsion or J ").TorcionalConstant = 0.00
+        obj.addProperty("App::PropertyFloat", "AreaSection", "SectionProprety", "Section area").AreaSection = 0.00
+
+        obj.addProperty("App::PropertyBool", "ViewSection", "DrawSection", "Ver a seção no membro").ViewSection = False
+        
+
+    # def makeRetangle(self):
+    #     Part.
 
 
-    def execute(self, obj): 
+
+    def execute(self, obj):
+        objects = FreeCAD.ActiveDocument.Objects
+        lines = list(filter(lambda object: 'Wire'in object.Name or 'Line' in object.Name, objects))
+        
+        for line in lines:
+            if line.SectionMember.Name == obj.Name:
+                print(line)
+
+
         obj.Label = 'Section'       
         pass
         
-        
-       
-
 
     def onChanged(self,obj,Parameter):
         if Parameter == 'edgeLength':
@@ -297,10 +322,10 @@ class CommandProfile():
     """My new command"""
 
     def GetResources(self):
-        return {"Pixmap"  : os.path.join(ICONPATH, "icons/profile.svg"), # the name of a svg file available in the resources
+        return {"Pixmap"  : os.path.join(ICONPATH, "icons/section.svg"), # the name of a svg file available in the resources
                 "Accel"   : "Shift+P", # a default shortcut (optional)
-                "MenuText": "Profile",
-                "ToolTip" : "Adds profile to structure member"}
+                "MenuText": "Section",
+                "ToolTip" : "Adds section to structure member"}
 
     def Activated(self):
         doc = FreeCAD.ActiveDocument

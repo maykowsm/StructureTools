@@ -2,11 +2,6 @@ import FreeCAD, App, FreeCADGui, Part, os
 from PySide2 import QtWidgets
 import subprocess
 
-try:
-	from Pynite import FEModel3D
-except:
-	subprocess.check_call(["pip", "install", "PyniteFEA"])
-
 ICONPATH = os.path.join(os.path.dirname(__file__), "resources")
 
 def show_error_message(msg):

@@ -1,7 +1,9 @@
 import FreeCAD, App, FreeCADGui, Part, os
 from PySide2 import QtWidgets
+from PySide2.QtGui import QPixmap
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "resources")
+# path_ui = str(os.path.dirname(__file__))+'/resources/ui/sectionGui.ui'
 
 def show_error_message(msg):
     msg_box = QtWidgets.QMessageBox()
@@ -15,25 +17,14 @@ def show_error_message(msg):
 class Section:
     def __init__(self, obj):
         obj.Proxy = self
-        obj.addProperty("App::PropertyLinkSubList", "ObjectBase", "Base", "Object base")
-
-        obj.addProperty("App::PropertyEnumeration", "SectionType","SectionType","Section type")
-        obj.GlobalDirection = ['generic section','rectangle section','I section', 'T section','U section']
-        obj.GlobalDirection = 'generic section'
-
-        # Dimenções da seção retangular        
-        obj.addProperty("App::PropertyLength", "heightSection", "SectionRetangle", "Height section")
-        obj.addProperty("App::PropertyLength", "widthSection", "SectionRetangle", "Width section")
-
-        # Dimenções da seção I
-        obj.addProperty("App::PropertyLength", "heightSection", "SectionRetangle", "Height section")
-        obj.addProperty("App::PropertyLength", "widthSection", "SectionRetangle", "Width section")
+        obj.addProperty("App::PropertyLinkSub", "ObjectBase", "Base", "Object base")
         
         # Propriedades da seção
         obj.addProperty("App::PropertyFloat", "MomentInertiaY", "SectionProprety", "Inertia in the local Y axis").MomentInertiaY = 0.00
         obj.addProperty("App::PropertyFloat", "MomentInertiaZ", "SectionProprety", "Inertia in the local Z axis").MomentInertiaZ = 0.00
-        obj.addProperty("App::PropertyFloat", "TorcionalConstant", "SectionProprety", "Inertia torsion or J ").TorcionalConstant = 0.00
-        obj.addProperty("App::PropertyFloat", "AreaSection", "SectionProprety", "Section area").AreaSection = 0.00
+        obj.addProperty("App::PropertyFloat", "MomentInertiaPolar", "SectionProprety", "Inertia torsion or J ").MomentInertiaPolar = 0.00
+        obj.addProperty("App::PropertyFloat", "ProductInertiaYZ", "SectionProprety", "Inertia torsion or J ").ProductInertiaYZ = 0.00
+        obj.addProperty("App::PropertyArea", "AreaSection", "SectionProprety", "Section area").AreaSection = 0.00
 
         obj.addProperty("App::PropertyBool", "ViewSection", "DrawSection", "Ver a seção no membro").ViewSection = False
         
@@ -46,14 +37,22 @@ class Section:
     def execute(self, obj):
         objects = FreeCAD.ActiveDocument.Objects
         lines = list(filter(lambda object: 'Wire'in object.Name or 'Line' in object.Name, objects))
+
+        if obj.ObjectBase:
+            face = obj.ObjectBase[0].getSubObject(obj.ObjectBase[1][0])
+            obj.AreaSection = face.Area
+            obj.MomentInertiaZ = face.MatrixOfInertia.A[0]
+            obj.MomentInertiaY = face.MatrixOfInertia.A[5]
+            obj.ProductInertiaYZ = face.MatrixOfInertia.A[1] if abs(face.MatrixOfInertia.A[1]) > 1 else 0
+            obj.MomentInertiaPolar = face.MatrixOfInertia.A[0] + face.MatrixOfInertia.A[5]
         
-        for line in lines:
-            if line.SectionMember.Name == obj.Name:
-                print(line)
+        # for line in lines:
+        #     if line.SectionMember.Name == obj.Name:
+        #         print(line)
 
 
-        obj.Label = 'Section'       
-        pass
+        # obj.Label = 'Section'       
+        # pass
         
 
     def onChanged(self,obj,Parameter):
@@ -65,6 +64,17 @@ class ViewProviderSection:
     def __init__(self, obj):
         obj.Proxy = self
     
+    # def setupContextMenu(self, obj, menu):
+    #     # Adiciona uma opção ao menu de contexto do objeto
+    #     action = QtWidgets.QAction("Edit Section", menu)
+    #     action.triggered.connect(lambda: self.editSection(obj))
+    #     menu.addAction(action)
+    
+    # def editSection(self, obj):
+    #     # Função executada ao clicar no menu de contexto
+    #     FreeCAD.Console.PrintMessage(f"Objeto {obj.Object.Name} foi clicado!\n")
+    #     janela = EditSectionGui(obj)
+    #     FreeCADGui.Control.showDialog(janela)
 
     def getIcon(self):
         return """/* XPM */
@@ -318,12 +328,44 @@ static char * profile_xpm[] = {
         """
 
 
+# class EditSectionGui():
+#     def __init__(self, obj):
+#         self.obj = obj
+#         self.form = FreeCADGui.PySideUic.loadUi(path_ui)
+
+#         #Define a função do botão ok        
+#         self.form.btn_ok.clicked.connect(self.accept)
+
+#         self.form.comboBox.textActivated.connect(self.changeImage)
+
+#         # self.form.image.pixmap = str(os.path.dirname(__file__))+'/resources/ui/img/sectionRetangle.svg'
+#         pixmap = QPixmap(str(os.path.dirname(__file__))+'/resources/ui/img/sectionI.svg')
+#         self.form.image.setPixmap(pixmap)
+    
+#     def changeImage(self, selection):
+#         match selection:
+#             case 'Rectangle Section':
+#                 pixmap = QPixmap(str(os.path.dirname(__file__))+'/resources/ui/img/sectionRetangle.svg')
+
+#             case 'Circular Section':
+#                 pixmap = QPixmap(str(os.path.dirname(__file__))+'/resources/ui/img/sectionI.svg')
+            
+#             case 'W Section':
+#                 pixmap = QPixmap(str(os.path.dirname(__file__))+'/resources/ui/img/sectionI.svg')
+
+#         self.form.image.setPixmap(pixmap)
+    
+#     def accept(self):
+#         print('botao ok clicado')
+
+
+
 class CommandProfile():
     """My new command"""
 
     def GetResources(self):
         return {"Pixmap"  : os.path.join(ICONPATH, "icons/section.svg"), # the name of a svg file available in the resources
-                "Accel"   : "Shift+P", # a default shortcut (optional)
+                "Accel"   : "S+C", # a default shortcut (optional)
                 "MenuText": "Section",
                 "ToolTip" : "Adds section to structure member"}
 

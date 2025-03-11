@@ -4,6 +4,12 @@ import subprocess
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "resources")
 
+try:
+	from Pynite import FEModel3D
+except:
+	print('Instalando dependencias')
+	subprocess.check_call(["pip", "install", "PyniteFEA"])
+
 def show_error_message(msg):
     msg_box = QtWidgets.QMessageBox()
     msg_box.setIcon(QtWidgets.QMessageBox.Critical)  #Ícone de erro
@@ -170,7 +176,7 @@ class Calc:
 			if not section.Name in sections:
 				Iy = section.MomentInertiaY
 				Iz = section.MomentInertiaZ
-				J  = section.TorcionalConstant
+				J  = section.MomentInertiaPolar
 				A  = section.AreaSection
 				model.add_section(section.Name, A, Iy, Iz, J)
 				sections.append(section.Name)

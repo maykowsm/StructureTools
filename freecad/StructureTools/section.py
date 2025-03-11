@@ -1,4 +1,4 @@
-import FreeCAD, App, FreeCADGui, Part, os
+import FreeCAD, App, FreeCADGui, Part, os, math, copy
 from PySide2 import QtWidgets
 from PySide2.QtGui import QPixmap
 
@@ -15,44 +15,112 @@ def show_error_message(msg):
 
 
 class Section:
-    def __init__(self, obj):
+    def __init__(self, obj, selection):
+
+        # Define os objetos pré celecionados
+        objectSelected = (selection[0].Object, selection[0].SubElementNames[0]) if len(selection) > 0 else ()
+            
+        
         obj.Proxy = self
-        obj.addProperty("App::PropertyLinkSub", "ObjectBase", "Base", "Object base")
+        obj.addProperty("App::PropertyLinkSub", "ObjectBase", "Base", "Object base").ObjectBase = objectSelected
         
         # Propriedades da seção
         obj.addProperty("App::PropertyFloat", "MomentInertiaY", "SectionProprety", "Inertia in the local Y axis").MomentInertiaY = 0.00
         obj.addProperty("App::PropertyFloat", "MomentInertiaZ", "SectionProprety", "Inertia in the local Z axis").MomentInertiaZ = 0.00
-        obj.addProperty("App::PropertyFloat", "MomentInertiaPolar", "SectionProprety", "Inertia torsion or J ").MomentInertiaPolar = 0.00
-        obj.addProperty("App::PropertyFloat", "ProductInertiaYZ", "SectionProprety", "Inertia torsion or J ").ProductInertiaYZ = 0.00
+        obj.addProperty("App::PropertyFloat", "MomentInertiaPolar", "SectionProprety", "Polar Moment of Inertia J").MomentInertiaPolar = 0.00
+        obj.addProperty("App::PropertyFloat", "ProductInertiaYZ", "SectionProprety", "Product of Inertia").ProductInertiaYZ = 0.00
         obj.addProperty("App::PropertyArea", "AreaSection", "SectionProprety", "Section area").AreaSection = 0.00
 
         obj.addProperty("App::PropertyBool", "ViewSection", "DrawSection", "Ver a seção no membro").ViewSection = False
+        obj.addProperty("App::PropertyBool", "ViewFullSection", "DrawSection", "Ver a seção no membro").ViewFullSection = False
         
 
     # def makeRetangle(self):
     #     Part.
 
+    # Faz a rotação da face para que a normal conicida com o vetor passado como argumento
+    def rotate(self, face, normal, position = FreeCAD.Vector(0,0,0)):
+        normal.normalize()
+        try:
+            normalface = face.normalAt(0,0)
+        except:
+            normalface = face.Faces[0].normalAt(0,0)
+            
+
+        rotacao = FreeCAD.Rotation(normalface, normal)
+        faceRotacionada = face.transformGeometry(FreeCAD.Placement(position,rotacao).toMatrix())
+        return faceRotacionada
 
 
     def execute(self, obj):
         objects = FreeCAD.ActiveDocument.Objects
         lines = list(filter(lambda object: 'Wire'in object.Name or 'Line' in object.Name, objects))
 
-        if obj.ObjectBase:
+        # Valida se a seção possui um objeto atribuido e se o desenho da seção está ativo
+        if obj.ObjectBase :
+            # Captura as propriedaes da face e as adiciona aos seus respectivos campos
             face = obj.ObjectBase[0].getSubObject(obj.ObjectBase[1][0])
-            obj.AreaSection = face.Area
-            obj.MomentInertiaZ = face.MatrixOfInertia.A[0]
-            obj.MomentInertiaY = face.MatrixOfInertia.A[5]
-            obj.ProductInertiaYZ = face.MatrixOfInertia.A[1] if abs(face.MatrixOfInertia.A[1]) > 1 else 0
-            obj.MomentInertiaPolar = face.MatrixOfInertia.A[0] + face.MatrixOfInertia.A[5]
-        
-        # for line in lines:
-        #     if line.SectionMember.Name == obj.Name:
-        #         print(line)
+            if face.ShapeType == 'Face': # valida se o objeto é uma face
+                obj.AreaSection = face.Area
+                obj.MomentInertiaZ = face.MatrixOfInertia.A[0]
+                obj.MomentInertiaY = face.MatrixOfInertia.A[5]
+                obj.ProductInertiaYZ = face.MatrixOfInertia.A[1] if abs(face.MatrixOfInertia.A[1]) > 1 else 0
+                obj.MomentInertiaPolar = face.MatrixOfInertia.A[0] + face.MatrixOfInertia.A[5]                     
+
+                # Valida se possuem elementos atribuidos a seção e adiciona a seção no centro do elemento
+                listSections = []
+                listBar = []
+                if len(lines) > 0 and (obj.ViewSection == True or obj.ViewFullSection == True):
+                    for line in lines:
+                        section = face.copy()                        
+                        if line.SectionMember:
+                            if line.SectionMember.Name == obj.Name:
+
+                                rot = FreeCAD.Rotation(FreeCAD.Vector(0,0,1), 90 + float(line.RotationSection)) #Gira em 90º a seção transversal (Posição padrão)
+                                section.Placement = FreeCAD.Placement(FreeCAD.Vector(0,0,0), rot)
+
+                                dx = line.Shape.Vertexes[1].Point.x - line.Shape.Vertexes[0].Point.x
+                                dy = line.Shape.Vertexes[1].Point.y - line.Shape.Vertexes[0].Point.y
+                                dz = line.Shape.Vertexes[1].Point.z - line.Shape.Vertexes[0].Point.z
+
+                                if not(abs(dx) < 1e-2 and abs(dy) < 1e-2): #valida se o elemento não está na vertical
+
+                                    if obj.ViewSection:
+                                        section1 = section.copy()
+                                        section1 = self.rotate(section1, FreeCAD.Vector(1,0,0)) #Coloca a seção na vertical com a normal no eixo X
+                                        section1 = self.rotate(section1, FreeCAD.Vector(dx, dy, 0)) #Coloca a seção na direção da projeção do elemento no plano
+                                        section1 = self.rotate(section1, FreeCAD.Vector(dx, dy, dz), line.Shape.CenterOfGravity) #Coloca a seção na direção do elemento e translada  a seção para o centro do elemento                                    
+                                        listSections.append(section1.copy())
+                                    
+                                    # Valida se a barra vai ser visualizada por completo
+                                    if obj.ViewFullSection:
+                                        section2 = section.copy()
+                                        section2 = self.rotate(section2, FreeCAD.Vector(1,0,0)) #Coloca a seção na vertical com a normal no eixo X
+                                        section2 = self.rotate(section2, FreeCAD.Vector(dx, dy, 0)) #Coloca a seção na direção da projeção do elemento no plano
+                                        section2 = self.rotate(section2, FreeCAD.Vector(dx, dy, dz), line.Shape.Vertexes[0].Point) #Coloca a seção na direção do elemento e translada  a seção para o ponto inicial do elemento                                    
+
+                                        bar = section2.extrude(section2.Faces[0].normalAt(0,0) * (line.Length))
+                                        listBar.append(bar)
+                                                                    
+                                else:
+                                    rot = FreeCAD.Rotation(FreeCAD.Vector(0,0,1), 90 + float(line.RotationSection))
+                                    section.Placement = FreeCAD.Placement(line.Shape.CenterOfGravity, rot)
+                                    if obj.ViewSection:
+                                        listSections.append(section.copy())
+                                    
+                                    # Valida se a barra vai ser visualizada por completo
+                                    if obj.ViewFullSection:
+                                        bar1 = section.extrude(section.Faces[0].normalAt(0,0) * (line.Length / 2))
+                                        bar2 = section.extrude(section.Faces[0].normalAt(0,0) * (-line.Length / 2))
+                                        bar = bar1.fuse([bar2])
+                                        bar = bar.removeSplitter()
+                                        listBar.append(bar)
 
 
-        # obj.Label = 'Section'       
-        # pass
+                    shape = Part.makeCompound(listSections + listBar)
+                    obj.Shape = shape
+                else:
+                    obj.Shape = Part.Shape()
         
 
     def onChanged(self,obj,Parameter):
@@ -370,10 +438,12 @@ class CommandProfile():
                 "ToolTip" : "Adds section to structure member"}
 
     def Activated(self):
+        selections = list(FreeCADGui.Selection.getSelectionEx())
+        
         doc = FreeCAD.ActiveDocument
         obj = doc.addObject("Part::FeaturePython", "Section")
 
-        Section(obj)
+        Section(obj, selections)
         ViewProviderSection(obj.ViewObject)
         FreeCAD.ActiveDocument.recompute()        
         return

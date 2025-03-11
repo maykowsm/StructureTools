@@ -1,4 +1,4 @@
-import FreeCAD, App, FreeCADGui, Part, os
+import FreeCAD, App, FreeCADGui, Part, os, math
 from PySide2 import QtWidgets
 import subprocess
 
@@ -174,10 +174,15 @@ class Calc:
 				materiais.append(material.Name)
 
 			if not section.Name in sections:
-				Iy = section.MomentInertiaY
-				Iz = section.MomentInertiaZ
+				ang = line.RotationSection.getValueAs('rad')
+				Iy = ((section.MomentInertiaZ + section.MomentInertiaY) / 2 ) - ((section.MomentInertiaZ - section.MomentInertiaY) / 2 )*math.cos(2*ang) + section.ProductInertiaYZ*math.sin(2*ang)
+				Iz = ((section.MomentInertiaZ + section.MomentInertiaY) / 2 ) + ((section.MomentInertiaZ - section.MomentInertiaY) / 2 )*math.cos(2*ang) - section.ProductInertiaYZ*math.sin(2*ang)
+				# Iy = section.MomentInertiaY
+				# Iz = section.MomentInertiaZ
 				J  = section.MomentInertiaPolar
-				A  = section.AreaSection
+				A  = section.AreaSection.Value
+
+				print([Iy, Iz, J, A])
 				model.add_section(section.Name, A, Iy, Iz, J)
 				sections.append(section.Name)
 		

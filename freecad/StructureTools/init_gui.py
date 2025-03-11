@@ -19,7 +19,6 @@ try:
 except:
 	print('Instalando dependencias')
 	subprocess.check_call(["pip", "install", "PyniteFEA"])
-	subprocess.check_call(["pip", "install", "shapely"])
 
 class StructureTools(Gui.Workbench):
 	"""

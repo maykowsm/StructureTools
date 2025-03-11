@@ -177,8 +177,6 @@ class Calc:
 				ang = line.RotationSection.getValueAs('rad')
 				Iy = ((section.MomentInertiaZ + section.MomentInertiaY) / 2 ) - ((section.MomentInertiaZ - section.MomentInertiaY) / 2 )*math.cos(2*ang) + section.ProductInertiaYZ*math.sin(2*ang)
 				Iz = ((section.MomentInertiaZ + section.MomentInertiaY) / 2 ) + ((section.MomentInertiaZ - section.MomentInertiaY) / 2 )*math.cos(2*ang) - section.ProductInertiaYZ*math.sin(2*ang)
-				# Iy = section.MomentInertiaY
-				# Iz = section.MomentInertiaZ
 				J  = section.MomentInertiaPolar
 				A  = section.AreaSection.Value
 

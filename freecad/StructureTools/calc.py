@@ -174,14 +174,19 @@ class Calc:
 				materiais.append(material.Name)
 
 			if not section.Name in sections:
+
 				ang = line.RotationSection.getValueAs('rad')
-				Iy = ((section.MomentInertiaZ + section.MomentInertiaY) / 2 ) - ((section.MomentInertiaZ - section.MomentInertiaY) / 2 )*math.cos(2*ang) + section.ProductInertiaYZ*math.sin(2*ang)
-				Iz = ((section.MomentInertiaZ + section.MomentInertiaY) / 2 ) + ((section.MomentInertiaZ - section.MomentInertiaY) / 2 )*math.cos(2*ang) - section.ProductInertiaYZ*math.sin(2*ang)
 				J  = section.MomentInertiaPolar
 				A  = section.AreaSection.Value
+				Iy = section.MomentInertiaY
+				Iz = section.MomentInertiaZ 
+				Iyz = section.ProductInertiaYZ 
 
-				print([Iy, Iz, J, A])
-				model.add_section(section.Name, A, Iy, Iz, J)
+				# Aplica a rotação de eixo
+				RIy = ((Iz + Iy) / 2 ) - ((Iz - Iy) / 2 )*math.cos(2 * ang) + Iyz * math.sin(2 * ang)
+				RIz = ((Iz + Iy) / 2 ) + ((Iz - Iy) / 2 )*math.cos(2 * ang) - Iyz * math.sin(2 * ang)
+				
+				model.add_section(section.Name, A, RIy, RIz, J)
 				sections.append(section.Name)
 		
 		return model

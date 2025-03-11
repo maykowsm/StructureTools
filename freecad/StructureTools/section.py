@@ -61,60 +61,74 @@ class Section:
             # Captura as propriedaes da face e as adiciona aos seus respectivos campos
             face = obj.ObjectBase[0].getSubObject(obj.ObjectBase[1][0])
             if face.ShapeType == 'Face': # valida se o objeto é uma face
-                obj.AreaSection = face.Area
-                obj.MomentInertiaZ = face.MatrixOfInertia.A[0]
-                obj.MomentInertiaY = face.MatrixOfInertia.A[5]
-                obj.ProductInertiaYZ = face.MatrixOfInertia.A[1] if abs(face.MatrixOfInertia.A[1]) > 1 else 0
-                obj.MomentInertiaPolar = face.MatrixOfInertia.A[0] + face.MatrixOfInertia.A[5]                     
+
+                
+                cx, cy, cz = face.CenterOfMass
+                A = face.Area
+                Iy = face.MatrixOfInertia.A[5]
+                Iz = face.MatrixOfInertia.A[0]
+                Iyz = face.MatrixOfInertia.A[1] if abs(face.MatrixOfInertia.A[1]) > 1 else 0
+                
+                #Aplica o teorema de Steiner
+                Iy = Iy + A * cx**2
+                Iz = Iz + A * cy**2
+                Iyz = Iyz + A * cx * cy
+
+
+                obj.AreaSection = A
+                obj.MomentInertiaZ = Iz
+                obj.MomentInertiaY = Iy
+                obj.ProductInertiaYZ = Iyz
+                obj.MomentInertiaPolar = Iy + Iz                   
 
                 # Valida se possuem elementos atribuidos a seção e adiciona a seção no centro do elemento
                 listSections = []
                 listBar = []
                 if len(lines) > 0 and (obj.ViewSection == True or obj.ViewFullSection == True):
                     for line in lines:
-                        section = face.copy()                        
-                        if line.SectionMember:
-                            if line.SectionMember.Name == obj.Name:
+                        section = face.copy()
+                        if 'SectionMember' in line.PropertiesList: #valida se a linha possui a propriedade
+                            if line.SectionMember: #Valida se a propriedade possui valor
+                                if line.SectionMember.Name == obj.Name:
+                                    rot = FreeCAD.Rotation(FreeCAD.Vector(0,0,1), 90 + float(line.RotationSection)) #Gira em 90º a seção transversal (Posição padrão)
+                                    section.Placement = FreeCAD.Placement(FreeCAD.Vector(0,0,0), rot)
 
-                                rot = FreeCAD.Rotation(FreeCAD.Vector(0,0,1), 90 + float(line.RotationSection)) #Gira em 90º a seção transversal (Posição padrão)
-                                section.Placement = FreeCAD.Placement(FreeCAD.Vector(0,0,0), rot)
+                                    dx = line.Shape.Vertexes[1].Point.x - line.Shape.Vertexes[0].Point.x
+                                    dy = line.Shape.Vertexes[1].Point.y - line.Shape.Vertexes[0].Point.y
+                                    dz = line.Shape.Vertexes[1].Point.z - line.Shape.Vertexes[0].Point.z
 
-                                dx = line.Shape.Vertexes[1].Point.x - line.Shape.Vertexes[0].Point.x
-                                dy = line.Shape.Vertexes[1].Point.y - line.Shape.Vertexes[0].Point.y
-                                dz = line.Shape.Vertexes[1].Point.z - line.Shape.Vertexes[0].Point.z
+                                    if not(abs(dx) < 1e-2 and abs(dy) < 1e-2): #valida se o elemento não está na vertical
 
-                                if not(abs(dx) < 1e-2 and abs(dy) < 1e-2): #valida se o elemento não está na vertical
+                                        if obj.ViewSection:
+                                            section1 = section.copy()
+                                            section1 = self.rotate(section1, FreeCAD.Vector(1,0,0)) #Coloca a seção na vertical com a normal no eixo X
+                                            section1 = self.rotate(section1, FreeCAD.Vector(dx, dy, 0)) #Coloca a seção na direção da projeção do elemento no plano
+                                            section1 = self.rotate(section1, FreeCAD.Vector(dx, dy, dz), line.Shape.CenterOfGravity) #Coloca a seção na direção do elemento e translada  a seção para o centro do elemento                                    
+                                            listSections.append(section1.copy())
+                                        
+                                        # Valida se a barra vai ser visualizada por completo
+                                        if obj.ViewFullSection:
+                                            section2 = section.copy()
+                                            section2 = self.rotate(section2, FreeCAD.Vector(1,0,0)) #Coloca a seção na vertical com a normal no eixo X
+                                            section2 = self.rotate(section2, FreeCAD.Vector(dx, dy, 0)) #Coloca a seção na direção da projeção do elemento no plano
+                                            section2 = self.rotate(section2, FreeCAD.Vector(dx, dy, dz), line.Shape.Vertexes[0].Point) #Coloca a seção na direção do elemento e translada  a seção para o ponto inicial do elemento                                    
 
-                                    if obj.ViewSection:
-                                        section1 = section.copy()
-                                        section1 = self.rotate(section1, FreeCAD.Vector(1,0,0)) #Coloca a seção na vertical com a normal no eixo X
-                                        section1 = self.rotate(section1, FreeCAD.Vector(dx, dy, 0)) #Coloca a seção na direção da projeção do elemento no plano
-                                        section1 = self.rotate(section1, FreeCAD.Vector(dx, dy, dz), line.Shape.CenterOfGravity) #Coloca a seção na direção do elemento e translada  a seção para o centro do elemento                                    
-                                        listSections.append(section1.copy())
-                                    
-                                    # Valida se a barra vai ser visualizada por completo
-                                    if obj.ViewFullSection:
-                                        section2 = section.copy()
-                                        section2 = self.rotate(section2, FreeCAD.Vector(1,0,0)) #Coloca a seção na vertical com a normal no eixo X
-                                        section2 = self.rotate(section2, FreeCAD.Vector(dx, dy, 0)) #Coloca a seção na direção da projeção do elemento no plano
-                                        section2 = self.rotate(section2, FreeCAD.Vector(dx, dy, dz), line.Shape.Vertexes[0].Point) #Coloca a seção na direção do elemento e translada  a seção para o ponto inicial do elemento                                    
-
-                                        bar = section2.extrude(section2.Faces[0].normalAt(0,0) * (line.Length))
-                                        listBar.append(bar)
+                                            bar = section2.extrude(section2.Faces[0].normalAt(0,0) * (line.Length))
+                                            listBar.append(bar)
                                                                     
-                                else:
-                                    rot = FreeCAD.Rotation(FreeCAD.Vector(0,0,1), 90 + float(line.RotationSection))
-                                    section.Placement = FreeCAD.Placement(line.Shape.CenterOfGravity, rot)
-                                    if obj.ViewSection:
-                                        listSections.append(section.copy())
-                                    
-                                    # Valida se a barra vai ser visualizada por completo
-                                    if obj.ViewFullSection:
-                                        bar1 = section.extrude(section.Faces[0].normalAt(0,0) * (line.Length / 2))
-                                        bar2 = section.extrude(section.Faces[0].normalAt(0,0) * (-line.Length / 2))
-                                        bar = bar1.fuse([bar2])
-                                        bar = bar.removeSplitter()
-                                        listBar.append(bar)
+                                    else:
+                                        rot = FreeCAD.Rotation(FreeCAD.Vector(0,0,1), 90 + float(line.RotationSection))
+                                        section.Placement = FreeCAD.Placement(line.Shape.CenterOfGravity, rot)
+                                        if obj.ViewSection:
+                                            listSections.append(section.copy())
+                                        
+                                        # Valida se a barra vai ser visualizada por completo
+                                        if obj.ViewFullSection:
+                                            bar1 = section.extrude(section.Faces[0].normalAt(0,0) * (line.Length / 2))
+                                            bar2 = section.extrude(section.Faces[0].normalAt(0,0) * (-line.Length / 2))
+                                            bar = bar1.fuse([bar2])
+                                            bar = bar.removeSplitter()
+                                            listBar.append(bar)
 
 
                     shape = Part.makeCompound(listSections + listBar)

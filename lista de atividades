@@ -1,7 +1,9 @@
-Ajustes de unidades
-adicionar ferramentas de edição do draft
-adicionar cargas no elemento completo ao clicar sobre ele 
-Adicionar sketch nas ferramentas de desenho
-Adicionar ferramenta de visualização de reações de apoio
-visuaalização de maximos e minimos nos diagramas
+Melhorias################################
+    Ajustes de unidades
+    Adicionar ferramenta de visualização de reações de apoio
+    visuaalização de maximos e minimos nos diagramas
+
+
+bugs###################
+    Bug encontrado na ferramenta de seção ao visualizar a seção em polilinhas que se curvam como um arco por exemplo
 

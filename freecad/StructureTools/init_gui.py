@@ -47,7 +47,7 @@ class StructureTools(Gui.Workbench):
 		from freecad.StructureTools import diagram
 
 		
-		import DraftTools, SketcherGui, BIMGui
+		import DraftTools, SketcherGui
 		# NOTE: Context for this commands must be "Workbench"
 		self.appendToolbar('DraftDraw', ["Sketcher_NewSketch","Draft_Line", "Draft_Wire", "Draft_ArcTools", "Draft_BSpline"])
 		self.appendToolbar('DraftEdit', ["Draft_Move", "Draft_Rotate", "Draft_Clone", "Draft_Offset", "Draft_Trimex", "Draft_Join", "Draft_Split","Draft_Stretch","Draft_Draft2Sketch"])

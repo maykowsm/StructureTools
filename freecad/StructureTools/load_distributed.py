@@ -273,19 +273,32 @@ class CommandLoadDistributed():
 
     def Activated(self):
         try:
-            selections = list(FreeCADGui.Selection.getSelectionEx())        
+            selections = list(FreeCADGui.Selection.getSelectionEx())
+        
             for selection in selections:
-                for subSelectionname in selection.SubElementNames:
+                if selection.HasSubObjects: #Valida se a seleção possui sub objetos
+                    for subSelectionname in selection.SubElementNames:
 
-                    doc = FreeCAD.ActiveDocument
-                    obj = doc.addObject("Part::FeaturePython", "Load_Distributed")
+                        doc = FreeCAD.ActiveDocument
+                        obj = doc.addObject("Part::FeaturePython", "Load_Distributed")
 
-                    objLoad = LoadDistributed(obj,(selection.Object, subSelectionname))
-                    ViewProviderLoadDistributed(obj.ViewObject)
+                        print(subSelectionname)
+                        objLoad = LoadDistributed(obj,(selection.Object, subSelectionname))
+                        ViewProviderLoadDistributed(obj.ViewObject)
+                else:
+                    # pass
+                    line = selection.Object
+                    edges = line.Shape.Edges
+                    for i in range(len(edges)):
+                        doc = FreeCAD.ActiveDocument
+                        obj = doc.addObject("Part::FeaturePython", "Load_Distributed")
+                        LoadDistributed(obj,(selection.Object, 'Edge'+str(i+1)))
+                        ViewProviderLoadDistributed(obj.ViewObject)
+
             
             FreeCAD.ActiveDocument.recompute()
         except:
-            show_error_message("Seleciona um ponto ou uma barra para adicionar um carregamento.")
+            show_error_message("Seleciona uma barra para adicionar um carregamento distribuido.")
         return
 
     def IsActive(self):

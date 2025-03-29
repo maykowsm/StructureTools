@@ -2,8 +2,14 @@ Melhorias################################
     Ajustes de unidades
     Adicionar ferramenta de visualização de reações de apoio
     visuaalização de maximos e minimos nos diagramas
+    Adicionar cargas pontuais em qualquer posição das barras
+    Adicionar cargas distribuidas em qualquer posição das barras
+    Adicionar cargas pontuais com sinal negativo
+    Adicionar cargas distribuidas com valores negativos
+    Adicionar Rotulas
+    Adicionar barras de treliça
 
 
 bugs###################
     Bug encontrado na ferramenta de seção ao visualizar a seção em polilinhas que se curvam como um arco por exemplo
-
+    em alguns casos colocar valores impares para o numero de presisao para cortante gera um bug no diagrama

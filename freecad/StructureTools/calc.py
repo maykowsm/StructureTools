@@ -22,7 +22,7 @@ class Calc:
 	def __init__(self, obj, elements):
 		obj.Proxy = self
 		obj.addProperty("App::PropertyLinkList", "ListElements", "Calc", "elementos para a analise").ListElements = elements
-		obj.addProperty("App::PropertyInteger", "Precision", "Calc", "Presizão dos gráficos").Precision = 10
+		# obj.addProperty("App::PropertyInteger", "Precision", "Calc", "Presizão dos gráficos").Precision = 10
 		obj.addProperty("App::PropertyString", "LengthUnit", "Calc", "set the length unit for calculation").LengthUnit = 'm'
 
 		obj.addProperty("App::PropertyStringList", "NameMembers", "Calc", "name of structure members")
@@ -34,12 +34,15 @@ class Calc:
 		obj.addProperty("App::PropertyFloatList", "MinMomentZ", "ResultMoment", "momento minimo em Z")
 		obj.addProperty("App::PropertyFloatList", "MaxMomentY", "ResultMoment", "momento maximo em Y")
 		obj.addProperty("App::PropertyFloatList", "MaxMomentZ", "ResultMoment", "momento maximo em Z")
+		obj.addProperty("App::PropertyInteger", "NumPointsMoment", "NumPoints", "Presizão dos gráficos").NumPointsMoment = 10
 
 		obj.addProperty("App::PropertyStringList", "AxialForce", "ResultAxial", "força axial")
+		obj.addProperty("App::PropertyInteger", "NumPointsAxial", "NumPoints", "Presizão dos gráficos").NumPointsAxial = 10
 		
 		obj.addProperty("App::PropertyStringList", "Torque", "ResultTorque", "torque no elemento")
 		obj.addProperty("App::PropertyFloatList", "MinTorque", "ResultTorque", "torque minimo")
 		obj.addProperty("App::PropertyFloatList", "MaxTorque", "ResultTorque", "torque maximo")
+		obj.addProperty("App::PropertyInteger", "NumPointsTorque", "NumPoints", "Presizão dos gráficos").NumPointsTorque = 10
 		
 		obj.addProperty("App::PropertyStringList", "ShearY", "ResultShear", "cortante")
 		obj.addProperty("App::PropertyFloatList", "MinShearY", "ResultShear", "cortante minimo")
@@ -47,6 +50,7 @@ class Calc:
 		obj.addProperty("App::PropertyStringList", "ShearZ", "ResultShear", "cortante")
 		obj.addProperty("App::PropertyFloatList", "MinShearZ", "ResultShear", "cortante minimo")
 		obj.addProperty("App::PropertyFloatList", "MaxShearZ", "ResultShear", "cortante maximo")
+		obj.addProperty("App::PropertyInteger", "NumPointsShear", "NumPoints", "Presizão dos gráficos").NumPointsShear = 10
 
 		obj.addProperty("App::PropertyStringList", "DeflectionY", "ResultDeflection", "Deslocamento em y")
 		obj.addProperty("App::PropertyFloatList", "MinDeflectionY", "ResultDeflection", "Deslocamento minimo em y")
@@ -54,6 +58,7 @@ class Calc:
 		obj.addProperty("App::PropertyStringList", "DeflectionZ", "ResultDeflection", "Deslocamento em Z")
 		obj.addProperty("App::PropertyFloatList", "MinDeflectionZ", "ResultDeflection", "Deslocamento minimo em Z")
 		obj.addProperty("App::PropertyFloatList", "MaxDeflectionZ", "ResultDeflection", "Deslocamento máximo em Z")
+		obj.addProperty("App::PropertyInteger", "NumPointsDeflection", "NumPoints", "Presizão dos gráficos").NumPointsDeflection = 10
 
 
 	#  Mapeia os nós da estrutura, (inverte o eixo y e z para adequação as coordenadas do sover)
@@ -243,18 +248,18 @@ class Calc:
 		maxDeflectionz = []
 
 		for name in model.members.keys():			
-			momenty.append(','.join( str(value) for value in model.members[name].moment_array('My', obj.Precision)[1]))
-			momentz.append(','.join( str(value) for value in model.members[name].moment_array('Mz', obj.Precision)[1]))
+			momenty.append(','.join( str(value) for value in model.members[name].moment_array('My', obj.NumPointsMoment)[1]))
+			momentz.append(','.join( str(value) for value in model.members[name].moment_array('Mz', obj.NumPointsMoment)[1]))
 
-			sheary.append(','.join( str(value) for value in model.members[name].shear_array('Fy', obj.Precision)[1]))
-			shearz.append(','.join( str(value) for value in model.members[name].shear_array('Fz', obj.Precision)[1]))
+			sheary.append(','.join( str(value) for value in model.members[name].shear_array('Fy', obj.NumPointsShear)[1]))
+			shearz.append(','.join( str(value) for value in model.members[name].shear_array('Fz', obj.NumPointsShear)[1]))
 
-			axial.append(','.join( str(value) for value in model.members[name].axial_array(obj.Precision)[1]))
+			axial.append(','.join( str(value) for value in model.members[name].axial_array(obj.NumPointsAxial)[1]))
 			
-			torque.append(','.join( str(value) for value in model.members[name].torque_array(obj.Precision)[1]))
+			torque.append(','.join( str(value) for value in model.members[name].torque_array(obj.NumPointsTorque)[1]))
 
-			deflectiony.append(','.join( str(value) for value in model.members[name].deflection_array('dy', obj.Precision)[1]))
-			deflectionz.append(','.join( str(value) for value in model.members[name].deflection_array('dz', obj.Precision)[1]))
+			deflectiony.append(','.join( str(value) for value in model.members[name].deflection_array('dy', obj.NumPointsDeflection)[1]))
+			deflectionz.append(','.join( str(value) for value in model.members[name].deflection_array('dz', obj.NumPointsDeflection)[1]))
 
 			mimMomenty.append(model.members[name].min_moment('My'))
 			mimMomentz.append(model.members[name].min_moment('Mz'))

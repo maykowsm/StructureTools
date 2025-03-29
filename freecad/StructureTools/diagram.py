@@ -240,22 +240,22 @@ class Diagram:
 
 		listDiagram = []
 		if obj.MomentZ:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentZ),nodes, members, orderMembers, obj.ObjectBase.Precision, 0, obj.ScaleMoment, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 0, obj.ScaleMoment, obj.FontHeight)
 		
 		if obj.MomentY:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentY),nodes, members, orderMembers, obj.ObjectBase.Precision, 90, obj.ScaleMoment, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentY),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 90, obj.ScaleMoment, obj.FontHeight)
 		
 		if obj.ShearY:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearY),nodes, members, orderMembers, obj.ObjectBase.Precision, 0, obj.ScaleShear, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearY),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 0, obj.ScaleShear, obj.FontHeight)
 
 		if obj.ShearZ:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearZ),nodes, members, orderMembers, obj.ObjectBase.Precision, 90, obj.ScaleShear, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 90, obj.ScaleShear, obj.FontHeight)
 		
 		if obj.Torque:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.Torque),nodes, members, orderMembers, obj.ObjectBase.Precision, 0, obj.ScaleTorque, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.Torque),nodes, members, orderMembers, obj.ObjectBase.NumPointsTorque, 0, obj.ScaleTorque, obj.FontHeight)
 		
 		if obj.AxialForce:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.AxialForce),nodes, members, orderMembers, obj.ObjectBase.Precision, 0, obj.ScaleAxial, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.AxialForce),nodes, members, orderMembers, obj.ObjectBase.NumPointsAxial, 0, obj.ScaleAxial, obj.FontHeight)
 		
 		if not listDiagram:
 			shape = Part.Shape()

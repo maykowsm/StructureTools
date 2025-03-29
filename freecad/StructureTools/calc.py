@@ -23,6 +23,7 @@ class Calc:
 		obj.Proxy = self
 		obj.addProperty("App::PropertyLinkList", "ListElements", "Calc", "elementos para a analise").ListElements = elements
 		obj.addProperty("App::PropertyInteger", "Precision", "Calc", "Presizão dos gráficos").Precision = 10
+		obj.addProperty("App::PropertyString", "LengthUnit", "Calc", "set the length unit for calculation").LengthUnit = 'm'
 
 		obj.addProperty("App::PropertyStringList", "NameMembers", "Calc", "name of structure members")
 		obj.addProperty("App::PropertyVectorList", "Nodes", "Calc", "nós")
@@ -79,8 +80,15 @@ class Calc:
 					index = listNodes.index(node)
 					listIndexVertex.append(index)
 
+				# valida se o primeiro nó é mais auto do que o segundo nó, se sim inverte os nós do membro (necessário para manter os diagramas voltados para a posição correta)
+				n1 = listIndexVertex[0]
+				n2 = listIndexVertex[1]
+				if listNodes[n1][1] > listNodes[n2][1]:
+					aux = n1
+					n1 = n2
+					n2 = aux
 				listMembers[element.Name + '_' + str(i)] = {
-					'nodes': [str(listIndexVertex[0]), str(listIndexVertex[1])],
+					'nodes': [str(n1), str(n2)],
 					'material': element.MaterialMember.Name,
 					'section': element.SectionMember.Name}
 		
@@ -95,7 +103,7 @@ class Calc:
 
 	# Cria os membros no modelo do solver
 	def setMembers(self, model, members_map):
-		for memberName in list(members_map):
+		for memberName in list(members_map):			
 			model.add_member(memberName, members_map[memberName]['nodes'][0] , members_map[memberName]['nodes'][1], members_map[memberName]['material'], members_map[memberName]['section'])
 
 		return model

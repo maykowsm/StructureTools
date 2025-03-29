@@ -35,8 +35,6 @@ class Section:
         obj.addProperty("App::PropertyBool", "ViewFullSection", "DrawSection", "Ver a seção no membro").ViewFullSection = False
         
 
-    # def makeRetangle(self):
-    #     Part.
 
     # Faz a rotação da face para que a normal conicida com o vetor passado como argumento
     def rotate(self, face, normal, position = FreeCAD.Vector(0,0,0)):

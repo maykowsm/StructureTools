@@ -16,23 +16,24 @@ def show_error_message(msg):
 class Diagram:
 	def __init__(self, obj, calc):
 		obj.Proxy = self
-		obj.addProperty("App::PropertyLink", "ObjectBase", "Base", "elementos para a analise").ObjectBase = calc
-		obj.addProperty("App::PropertyInteger", "FontHeight", "Base", "Tamanho da fonte no diagrama").FontHeight = 200
+		obj.addProperty("App::PropertyLink", "ObjectBase", "Diagram", "elementos para a analise").ObjectBase = calc
+		obj.addProperty("App::PropertyInteger", "FontHeight", "Diagram", "Tamanho da fonte no diagrama").FontHeight = 100
+		obj.addProperty("App::PropertyInteger", "Precision", "Diagram", "precisão de casas decimais").Precision = 2
 
 		obj.addProperty("App::PropertyBool", "MomentZ", "DiagramMoment", "Ver diagrama de momento em Z").MomentZ = False
 		obj.addProperty("App::PropertyBool", "MomentY", "DiagramMoment", "Ver diagrama de momento em Y").MomentY = False
-		obj.addProperty("App::PropertyFloat", "ScaleMoment", "DiagramMoment", "Escala dos diagramas de momento").ScaleMoment = 0.1
+		obj.addProperty("App::PropertyFloat", "ScaleMoment", "DiagramMoment", "Escala dos diagramas de momento").ScaleMoment = 1
 
 
 		obj.addProperty("App::PropertyBool", "ShearZ", "DiagramShear", "Ver diagrama de cortante em Z").ShearZ = False
 		obj.addProperty("App::PropertyBool", "ShearY", "DiagramShear", "Ver diagrama de cortante em Y").ShearY = False
-		obj.addProperty("App::PropertyFloat", "ScaleShear", "DiagramShear", "Escala dos diagramas de cortante").ScaleShear = 10
+		obj.addProperty("App::PropertyFloat", "ScaleShear", "DiagramShear", "Escala dos diagramas de cortante").ScaleShear = 1
 		
 		obj.addProperty("App::PropertyBool", "Torque", "DiagramTorque", "Ver diagrama de torque").Torque = False
-		obj.addProperty("App::PropertyFloat", "ScaleTorque", "DiagramTorque", "Escala do diagrama de torque").ScaleTorque = 0.5
+		obj.addProperty("App::PropertyFloat", "ScaleTorque", "DiagramTorque", "Escala do diagrama de torque").ScaleTorque = 1
 
 		obj.addProperty("App::PropertyBool", "AxialForce", "DiagramAxial", "Ver diagrama de força normal").AxialForce = False
-		obj.addProperty("App::PropertyFloat", "ScaleAxial", "DiagramAxial", "Escala do diagrama de força normal").ScaleAxial = 10
+		obj.addProperty("App::PropertyFloat", "ScaleAxial", "DiagramAxial", "Escala do diagrama de força normal").ScaleAxial = 1
 	
 
 	# Gera uma matriz baseado em umdos parâmetros do calc
@@ -166,11 +167,12 @@ class Diagram:
 			return element
 	
 	# Gero os valores nos diagramas
-	def makeText(self, values, listMatrix, dist, fontHeight):
+	def makeText(self, values, listMatrix, dist, fontHeight, precision):
 		listWire = []
 		for i, value in enumerate(values):
 			offset = 0
-			string = "{:.2e}".format(round(abs(listMatrix[i])))
+			valueString = abs(listMatrix[i])
+			string = f"{valueString:.{precision}e}"
 			x = dist * i
 			y = value + offset if value > 0 else value - offset
 
@@ -185,21 +187,21 @@ class Diagram:
 
 
 	# Gera o diagrama da matriz passada como argumento
-	def makeDiagram(self, matrix,nodes, members, orderMembers, precision, rotacao, escale, fontHeight):
+	def makeDiagram(self, matrix,nodes, members, orderMembers, nPoints, rotacao, escale, fontHeight, precision):
 		
-		e = 1e-11
+		# e = 1e-11
 		listDiagram = []
 		for i, nameMember in enumerate(orderMembers):
 			p1 = nodes[int(members[nameMember]['nodes'][0])]
 			p2 = nodes[int(members[nameMember]['nodes'][1])]
 			length = ((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2 + (p2[2] - p1[2])**2)**0.5
-			dist = length / (precision -1) #Distancia entre os pontos no eixo X
-			values = [value * escale * e for value in matrix[i]]
+			dist = length / (nPoints -1) #Distancia entre os pontos no eixo X
+			values = [value * escale for value in matrix[i]]
 
 			ordinates = self.separatesOrdinates(values)
 			coordinates = self.generateCoordinates(ordinates, dist)
 			faces = self.generateFaces(coordinates)
-			texts = self.makeText(values, matrix[i], dist, fontHeight)
+			texts = self.makeText(values, matrix[i], dist, fontHeight, precision)
 			
 			# Posiciona o diagrama
 			dx = p2[0] - p1[0]
@@ -240,22 +242,22 @@ class Diagram:
 
 		listDiagram = []
 		if obj.MomentZ:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 0, obj.ScaleMoment, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 0, obj.ScaleMoment, obj.FontHeight, obj.Precision)
 		
 		if obj.MomentY:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentY),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 90, obj.ScaleMoment, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentY),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 90, obj.ScaleMoment, obj.FontHeight, obj.Precision)
 		
 		if obj.ShearY:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearY),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 0, obj.ScaleShear, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearY),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 0, obj.ScaleShear, obj.FontHeight, obj.Precision)
 
 		if obj.ShearZ:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 90, obj.ScaleShear, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 90, obj.ScaleShear, obj.FontHeight, obj.Precision)
 		
 		if obj.Torque:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.Torque),nodes, members, orderMembers, obj.ObjectBase.NumPointsTorque, 0, obj.ScaleTorque, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.Torque),nodes, members, orderMembers, obj.ObjectBase.NumPointsTorque, 0, obj.ScaleTorque, obj.FontHeight, obj.Precision)
 		
 		if obj.AxialForce:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.AxialForce),nodes, members, orderMembers, obj.ObjectBase.NumPointsAxial, 0, obj.ScaleAxial, obj.FontHeight)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.AxialForce),nodes, members, orderMembers, obj.ObjectBase.NumPointsAxial, 0, obj.ScaleAxial, obj.FontHeight, obj.Precision)
 		
 		if not listDiagram:
 			shape = Part.Shape()

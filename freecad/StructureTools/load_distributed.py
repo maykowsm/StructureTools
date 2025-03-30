@@ -19,7 +19,14 @@ class LoadDistributed:
         obj.addProperty("App::PropertyForce", "InitialLoading", "Distributed", "Initial loading (load per unit length)").InitialLoading = 10000000
         obj.addProperty("App::PropertyForce", "FinalLoading", "Distributed", "Final loading (load per unit length)").FinalLoading = 10000000
         obj.addProperty("App::PropertyFloat", "ScaleDraw", "Load", "Scale from drawing").ScaleDraw = 1
-        
+
+        # obj.addProperty("App::PropertyFloat", "InitialLoadingInmm", "Distributed", "Initial loading (load per unit length)")
+        # obj.addProperty("App::PropertyFloat", "FinalLoadingInmm", "Distributed", "Final loading (load per unit length)")
+        # obj.setEditorMode("InitialLoadingInmm", 2)
+        # obj.setEditorMode("FinalLoadingInmm", 2)
+        # obj.FinalLoadingInmm.Hidden = True
+        # obj.InitialLoadingInmm.Hidden = True
+
         obj.addProperty("App::PropertyEnumeration", "GlobalDirection","Load","Global direction load")
         obj.GlobalDirection = ['+X','-X', '+Y','-Y', '+Z','-Z']
         obj.GlobalDirection = '-Z'
@@ -54,7 +61,8 @@ class LoadDistributed:
         return Part.makeCompound([cone, cylinder])
     
     
-    def execute(self, obj):        
+    def execute(self, obj):
+
         subelement = self.getSubelement(obj, obj.ObjectBase[0][1][0])
         if 'Edge' in obj.ObjectBase[0][1][0]:
             k = 1000000
@@ -272,33 +280,33 @@ class CommandLoadDistributed():
                 "ToolTip" : "Adds loads to the structure"}
 
     def Activated(self):
-        try:
-            selections = list(FreeCADGui.Selection.getSelectionEx())
+        # try:
+        selections = list(FreeCADGui.Selection.getSelectionEx())
+    
+        for selection in selections:
+            if selection.HasSubObjects: #Valida se a seleção possui sub objetos
+                for subSelectionname in selection.SubElementNames:
+
+                    doc = FreeCAD.ActiveDocument
+                    obj = doc.addObject("Part::FeaturePython", "Load_Distributed")
+
+                    print(subSelectionname)
+                    objLoad = LoadDistributed(obj,(selection.Object, subSelectionname))
+                    ViewProviderLoadDistributed(obj.ViewObject)
+            else:
+                # pass
+                line = selection.Object
+                edges = line.Shape.Edges
+                for i in range(len(edges)):
+                    doc = FreeCAD.ActiveDocument
+                    obj = doc.addObject("Part::FeaturePython", "Load_Distributed")
+                    LoadDistributed(obj,(selection.Object, 'Edge'+str(i+1)))
+                    ViewProviderLoadDistributed(obj.ViewObject)
+
         
-            for selection in selections:
-                if selection.HasSubObjects: #Valida se a seleção possui sub objetos
-                    for subSelectionname in selection.SubElementNames:
-
-                        doc = FreeCAD.ActiveDocument
-                        obj = doc.addObject("Part::FeaturePython", "Load_Distributed")
-
-                        print(subSelectionname)
-                        objLoad = LoadDistributed(obj,(selection.Object, subSelectionname))
-                        ViewProviderLoadDistributed(obj.ViewObject)
-                else:
-                    # pass
-                    line = selection.Object
-                    edges = line.Shape.Edges
-                    for i in range(len(edges)):
-                        doc = FreeCAD.ActiveDocument
-                        obj = doc.addObject("Part::FeaturePython", "Load_Distributed")
-                        LoadDistributed(obj,(selection.Object, 'Edge'+str(i+1)))
-                        ViewProviderLoadDistributed(obj.ViewObject)
-
-            
-            FreeCAD.ActiveDocument.recompute()
-        except:
-            show_error_message("Seleciona uma barra para adicionar um carregamento distribuido.")
+        FreeCAD.ActiveDocument.recompute()
+        # except:
+        #     show_error_message("Seleciona uma barra para adicionar um carregamento distribuido.")
         return
 
     def IsActive(self):

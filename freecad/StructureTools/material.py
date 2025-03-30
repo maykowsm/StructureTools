@@ -16,9 +16,9 @@ class Material:
     def __init__(self, obj):
         obj.Proxy = self
 
-        obj.addProperty("App::PropertyFloat", "ModulusElasticity", "Material", "Analise Material','E-> Modulus of elasticity").ModulusElasticity = 0.00
+        obj.addProperty("App::PropertyPressure", "ModulusElasticity", "Material", "Analise Material','Modulus of elasticity").ModulusElasticity = 0.00
         obj.addProperty("App::PropertyFloat", "PoissonRatio", "Material", "Analise Material','v-> Poisson ratio").PoissonRatio = 0.00
-        obj.addProperty("App::PropertyFloat", "Density", "Material", "Analise Material','d-> Density").Density = 0.00
+        obj.addProperty("App::PropertyDensity", "Density", "Material", "Analise Material','d-> Density").Density = 0.00
 
 
     def execute(self, obj): 

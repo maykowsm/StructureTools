@@ -22,8 +22,9 @@ class Calc:
 	def __init__(self, obj, elements):
 		obj.Proxy = self
 		obj.addProperty("App::PropertyLinkList", "ListElements", "Calc", "elementos para a analise").ListElements = elements
-		# obj.addProperty("App::PropertyInteger", "Precision", "Calc", "Presizão dos gráficos").Precision = 10
+		
 		obj.addProperty("App::PropertyString", "LengthUnit", "Calc", "set the length unit for calculation").LengthUnit = 'm'
+		obj.addProperty("App::PropertyString", "ForceUnit", "Calc", "set the length unit for calculation").ForceUnit = 'kN'
 
 		obj.addProperty("App::PropertyStringList", "NameMembers", "Calc", "name of structure members")
 		obj.addProperty("App::PropertyVectorList", "Nodes", "Calc", "nós")
@@ -62,26 +63,26 @@ class Calc:
 
 
 	#  Mapeia os nós da estrutura, (inverte o eixo y e z para adequação as coordenadas do sover)
-	def mapNodes(self, elements):	
+	def mapNodes(self, elements, unitLength):	
 		# Varre todos os elementos de linha e adiciona seus vertices à tabela de nodes
 		listNodes = []
 		for element in elements:
 			for edge in element.Shape.Edges:
 				for vertex in edge.Vertexes:
-					node = [round(vertex.Point.x, 2), round(vertex.Point.z, 2), round(vertex.Point.y, 2)]
+					node = [round(float(FreeCAD.Units.Quantity(vertex.Point.x,'mm').getValueAs(unitLength)), 2), round(float(FreeCAD.Units.Quantity(vertex.Point.z,'mm').getValueAs(unitLength)),2), round(float(FreeCAD.Units.Quantity(vertex.Point.y,'mm').getValueAs(unitLength)),2)]
 					if not node in listNodes:
 						listNodes.append(node)
 
 		return listNodes
 
 	# Mapeia os membros da estrutura 
-	def mapMembers(self, elements, listNodes):
+	def mapMembers(self, elements, listNodes, unitLength):
 		listMembers = {}
 		for element in elements:
 			for i, edge in enumerate(element.Shape.Edges):
 				listIndexVertex = []
 				for vertex in edge.Vertexes:
-					node = [round(vertex.Point.x, 2), round(vertex.Point.z, 2), round(vertex.Point.y, 2)]
+					node = [round(float(FreeCAD.Units.Quantity(vertex.Point.x,'mm').getValueAs(unitLength)), 2), round(float(FreeCAD.Units.Quantity(vertex.Point.z,'mm').getValueAs(unitLength)),2), round(float(FreeCAD.Units.Quantity(vertex.Point.y,'mm').getValueAs(unitLength)),2)]
 					index = listNodes.index(node)
 					listIndexVertex.append(index)
 
@@ -102,6 +103,7 @@ class Calc:
 	# Cria os nós no modelo do solver
 	def setNodes(self, model, nodes_map):
 		for i, node in enumerate(nodes_map):
+			# print(node)
 			model.add_node(str(i), node[0], node[1], node[2])
 		
 		return model
@@ -114,7 +116,7 @@ class Calc:
 		return model
 
 	# Cria os carregamentos
-	def setLoads(self, model, loads):
+	def setLoads(self, model, loads, unitForce):
 		pass
 		for load in loads:
 
@@ -145,33 +147,38 @@ class Calc:
 
 			# Valida se o carregamento é distribuido
 			if 'Edge' in load.ObjectBase[0][1][0]:
+				initial = float(load.InitialLoading.getValueAs(unitForce))
+				final = float(load.FinalLoading.getValueAs(unitForce))
+
+				# print(initial, final)
+
 				subname = int(load.ObjectBase[0][1][0].split('Edge')[1]) - 1
 				name = load.ObjectBase[0][0].Name + '_' + str(subname)
-				model.add_member_dist_load(name, axis, float(load.InitialLoading) * direction, float(load.FinalLoading) * direction)
+				model.add_member_dist_load(name, axis, initial * direction, final * direction)
 
 			# Valida se o carregamento é nodal
 			elif 'Vertex' in load.ObjectBase[0][1][0]:
 				subname = int(load.ObjectBase[0][1][0].split('Vertex')[1]) - 1
 				name = str(subname)
-				model.add_node_load(name, axis, float(load.NodalLoading) * direction)
+				model.add_node_load(name, axis, float(load.NodalLoading.getValueAs(unitForce)) * direction)
 			
 
 					
 		return model
 
 	# Cria os suportes
-	def setSuports(self, model, suports, nodes_map):
+	def setSuports(self, model, suports, nodes_map, unitLength):
 		for suport in suports:
 			suportvertex = list(suport.ObjectBase[0][0].Shape.Vertexes[int(suport.ObjectBase[0][1][0].split('Vertex')[1])-1].Point)
 			for i, node in enumerate(nodes_map):
-				if round(suportvertex[0],2) == round(node[0],2) and round(suportvertex[1],2) == round(node[2],2) and round(suportvertex[2],2) == round(node[1],2):					
+				if round(float(FreeCAD.Units.Quantity(suportvertex[0],'mm').getValueAs(unitLength)),2) == round(node[0],2) and round(float(FreeCAD.Units.Quantity(suportvertex[1],'mm').getValueAs(unitLength)),2) == round(node[2],2) and round(float(FreeCAD.Units.Quantity(suportvertex[2],'mm').getValueAs(unitLength)),2) == round(node[1],2):					
 					name = str(i)
 					model.def_support(name, suport.FixTranslationX, suport.FixTranslationZ, suport.FixTranslationY, suport.FixRotationX, suport.FixRotationZ, suport.FixRotationY)
 					break
 		
 		return model
 
-	def setMaterialAndSections(self, model, lines):
+	def setMaterialAndSections(self, model, lines, unitLength, unitForce):
 		materiais = []
 		sections = []
 		for line in lines:
@@ -179,22 +186,25 @@ class Calc:
 			section = line.SectionMember
 
 			if not material.Name in materiais:
-				density = material.Density
-				modulusElasticity = material.ModulusElasticity
-				poissonRatio = material.PoissonRatio
+				density = FreeCAD.Units.Quantity(material.Density).getValueAs('t/m^3') * 10 #Converte a unidade de entrada em t/m³ e na sequencia converte em kN/m³
+				density = float(FreeCAD.Units.Quantity(density, 'kN/m^3').getValueAs(unitForce+"/"+unitLength+"^3")) #Converte kN/m³ para as unidades definidas no calc
+				modulusElasticity = float(material.ModulusElasticity.getValueAs(unitForce+"/"+unitLength+"^2"))
+				poissonRatio = float(material.PoissonRatio)
 				G = modulusElasticity / (2 * (1 + poissonRatio))
 				model.add_material(material.Name, modulusElasticity, G, poissonRatio, density)
 				materiais.append(material.Name)
+				# print(density, modulusElasticity, poissonRatio, G)
 
 			if not section.Name in sections:
 
 				ang = line.RotationSection.getValueAs('rad')
-				J  = section.MomentInertiaPolar
-				A  = section.AreaSection.Value
-				Iy = section.MomentInertiaY
-				Iz = section.MomentInertiaZ 
-				Iyz = section.ProductInertiaYZ 
+				J  = float(FreeCAD.Units.Quantity(section.MomentInertiaPolar, 'mm^4').getValueAs(unitLength+"^4"))
+				A  = float(section.AreaSection.getValueAs(unitLength+"^2"))
+				Iy = float(FreeCAD.Units.Quantity(section.MomentInertiaY, 'mm^4').getValueAs(unitLength+"^4"))
+				Iz = float(FreeCAD.Units.Quantity(section.MomentInertiaZ, 'mm^4').getValueAs(unitLength+"^4"))
+				Iyz = float(FreeCAD.Units.Quantity(section.ProductInertiaYZ, 'mm^4').getValueAs(unitLength+"^4"))
 
+				# print(J,A,Iy,Iz, Iyz)
 				# Aplica a rotação de eixo
 				RIy = ((Iz + Iy) / 2 ) - ((Iz - Iy) / 2 )*math.cos(2 * ang) + Iyz * math.sin(2 * ang)
 				RIz = ((Iz + Iy) / 2 ) + ((Iz - Iy) / 2 )*math.cos(2 * ang) - Iyz * math.sin(2 * ang)
@@ -212,14 +222,14 @@ class Calc:
 		loads = list(filter(lambda element: 'Load' in element.Name, obj.ListElements))
 		suports = list(filter(lambda element: 'Suport' in element.Name, obj.ListElements))
 
-		nodes_map = self.mapNodes(lines)
-		members_map = self.mapMembers(lines, nodes_map)
+		nodes_map = self.mapNodes(lines, obj.LengthUnit)
+		members_map = self.mapMembers(lines, nodes_map, obj.LengthUnit)
 
-		model = self.setMaterialAndSections(model, lines)
+		model = self.setMaterialAndSections(model, lines, obj.LengthUnit, obj.ForceUnit)
 		model = self.setNodes(model, nodes_map)
 		model = self.setMembers(model, members_map)
-		model = self.setLoads(model, loads)
-		model = self.setSuports(model, suports, nodes_map)
+		model = self.setLoads(model, loads,obj.ForceUnit)
+		model = self.setSuports(model, suports, nodes_map, obj.LengthUnit)
 
 		model.analyze()
 

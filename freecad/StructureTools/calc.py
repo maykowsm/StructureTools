@@ -4,11 +4,13 @@ import subprocess
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "resources")
 
-try:
-	from Pynite import FEModel3D
-except:
-	print('Instalando dependencias')
-	subprocess.check_call(["pip", "install", "PyniteFEA"])
+from .Pynite_main.FEModel3D import FEModel3D
+
+# try:
+# 	from Pynite import FEModel3D
+# except:
+# 	print('Instalando dependencias')
+# 	subprocess.check_call(["pip", "install", "PyniteFEA"])
 
 def show_error_message(msg):
     msg_box = QtWidgets.QMessageBox()

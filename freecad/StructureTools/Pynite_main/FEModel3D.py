@@ -9,21 +9,21 @@ from math import isclose
 from numpy import array, zeros, matmul, divide, subtract, atleast_2d, all
 from numpy.linalg import solve
 
-from Node3D import Node3D
-from Material import Material
-from Section import Section, SteelSection
-from PhysMember import PhysMember
-from Spring3D import Spring3D
-from Member3D import Member3D
-from Quad3D import Quad3D
-from Plate3D import Plate3D
-from LoadCombo import LoadCombo
-from Mesh import Mesh
+from .Node3D import Node3D
+from .Material import Material
+from .Section import Section, SteelSection
+from .PhysMember import PhysMember
+from .Spring3D import Spring3D
+from .Member3D import Member3D
+from .Quad3D import Quad3D
+from .Plate3D import Plate3D
+from .LoadCombo import LoadCombo
+from .Mesh import Mesh
 # from Mesh import RectangleMesh
 # from Mesh import AnnulusMesh
 # from Mesh import FrustrumMesh
 # from Mesh import CylinderMesh
-import Analysis
+from .Analysis import _prepare_model, _identify_combos,_check_stability, _PDelta_step, _pushover_step, _store_displacements ,  _sum_displacements, _check_TC_convergence, _calc_reactions, _check_statics, _partition_D, _partition, _renumber
 
 
 # %%
@@ -1650,8 +1650,8 @@ class FEModel3D():
         # Check that there are no nodal instabilities
         if check_stability:
             if log: print('- Checking nodal stability')
-            if sparse: Analysis._check_stability(self, K.tocsr())
-            else: Analysis._check_stability(self, K)
+            if sparse: _check_stability(self, K.tocsr())
+            else: _check_stability(self, K)
 
         # Return the global stiffness matrix
         return K    
@@ -2010,13 +2010,13 @@ class FEModel3D():
             from scipy.sparse.linalg import spsolve
 
         # Prepare the model for analysis
-        Analysis._prepare_model(self)
+        _prepare_model(self)
 
         # Get the auxiliary list used to determine how the matrices will be partitioned
-        D1_indices, D2_indices, D2 = Analysis._partition_D(self)
+        D1_indices, D2_indices, D2 = _partition_D(self)
 
         # Identify which load combinations have the tags the user has given
-        combo_list = Analysis._identify_combos(self, combo_tags)
+        combo_list = _identify_combos(self, combo_tags)
 
         # Step through each load combination
         for combo in combo_list:
@@ -2040,15 +2040,15 @@ class FEModel3D():
                 
                 # Get the partitioned global stiffness matrix K11, K12, K21, K22
                 if sparse == True:
-                    K11, K12, K21, K22 = Analysis._partition(self, self.K(combo.name, log, check_stability, sparse).tolil(), D1_indices, D2_indices)
+                    K11, K12, K21, K22 = _partition(self, self.K(combo.name, log, check_stability, sparse).tolil(), D1_indices, D2_indices)
                 else:
-                    K11, K12, K21, K22 = Analysis._partition(self, self.K(combo.name, log, check_stability, sparse), D1_indices, D2_indices)
+                    K11, K12, K21, K22 = _partition(self, self.K(combo.name, log, check_stability, sparse), D1_indices, D2_indices)
 
                 # Get the partitioned global fixed end reaction vector
-                FER1, FER2 = Analysis._partition(self, self.FER(combo.name), D1_indices, D2_indices)
+                FER1, FER2 = _partition(self, self.FER(combo.name), D1_indices, D2_indices)
 
                 # Get the partitioned global nodal force vector       
-                P1, P2 = Analysis._partition(self, self.P(combo.name), D1_indices, D2_indices)          
+                P1, P2 = _partition(self, self.P(combo.name), D1_indices, D2_indices)          
 
                 # Calculate the global displacement vector
                 if log: print('- Calculating global displacement vector')
@@ -2069,10 +2069,10 @@ class FEModel3D():
                         raise Exception('The stiffness matrix is singular, which implies rigid body motion. The structure is unstable. Aborting analysis.')
 
                 # Store the calculated displacements to the model and the nodes in the model
-                Analysis._store_displacements(self, D1, D2, D1_indices, D2_indices, combo)
+                _store_displacements(self, D1, D2, D1_indices, D2_indices, combo)
                 
                 # Check for tension/compression-only convergence
-                convergence = Analysis._check_TC_convergence(self, combo.name, log=log, spring_tolerance=spring_tolerance, member_tolerance=member_tolerance)
+                convergence = _check_TC_convergence(self, combo.name, log=log, spring_tolerance=spring_tolerance, member_tolerance=member_tolerance)
 
                 if convergence == False:
 
@@ -2084,7 +2084,7 @@ class FEModel3D():
                 iter_count += 1
 
         # Calculate reactions
-        Analysis._calc_reactions(self, log, combo_tags)
+        _calc_reactions(self, log, combo_tags)
 
         if log:
             print('')     
@@ -2093,7 +2093,7 @@ class FEModel3D():
 
         # Check statics if requested
         if check_statics == True:
-            Analysis._check_statics(self, combo_tags)
+            _check_statics(self, combo_tags)
 
         # Flag the model as solved
         self.solution = 'Linear TC'
@@ -2122,21 +2122,21 @@ class FEModel3D():
             from scipy.sparse.linalg import spsolve
 
         # Prepare the model for analysis
-        Analysis._prepare_model(self)
+        _prepare_model(self)
 
         # Get the auxiliary list used to determine how the matrices will be partitioned
-        D1_indices, D2_indices, D2 = Analysis._partition_D(self)
+        D1_indices, D2_indices, D2 = _partition_D(self)
 
         # Get the partitioned global stiffness matrix K11, K12, K21, K22
         # Note that for linear analysis the stiffness matrix can be obtained for any load combination, as it's the same for all of them
         combo_name = list(self.load_combos.keys())[0]
         if sparse == True:
-            K11, K12, K21, K22 = Analysis._partition(self, self.K(combo_name, log, check_stability, sparse).tolil(), D1_indices, D2_indices)
+            K11, K12, K21, K22 = _partition(self, self.K(combo_name, log, check_stability, sparse).tolil(), D1_indices, D2_indices)
         else:
-            K11, K12, K21, K22 = Analysis._partition(self, self.K(combo_name, log, check_stability, sparse), D1_indices, D2_indices)
+            K11, K12, K21, K22 = _partition(self, self.K(combo_name, log, check_stability, sparse), D1_indices, D2_indices)
 
         # Identify which load combinations have the tags the user has given
-        combo_list = Analysis._identify_combos(self, combo_tags)
+        combo_list = _identify_combos(self, combo_tags)
 
         # Step through each load combination
         for combo in combo_list:
@@ -2146,10 +2146,10 @@ class FEModel3D():
                 print('- Analyzing load combination ' + combo.name)
 
             # Get the partitioned global fixed end reaction vector
-            FER1, FER2 = Analysis._partition(self, self.FER(combo.name), D1_indices, D2_indices)
+            FER1, FER2 = _partition(self, self.FER(combo.name), D1_indices, D2_indices)
 
             # Get the partitioned global nodal force vector       
-            P1, P2 = Analysis._partition(self, self.P(combo.name), D1_indices, D2_indices)          
+            P1, P2 = _partition(self, self.P(combo.name), D1_indices, D2_indices)          
 
             # Calculate the global displacement vector
             if log: print('- Calculating global displacement vector')
@@ -2173,10 +2173,10 @@ class FEModel3D():
                     raise Exception('The stiffness matrix is singular, which implies rigid body motion. The structure is unstable. Aborting analysis.')
 
             # Store the calculated displacements to the model and the nodes in the model
-            Analysis._store_displacements(self, D1, D2, D1_indices, D2_indices, combo)
+            _store_displacements(self, D1, D2, D1_indices, D2_indices, combo)
 
         # Calculate reactions
-        Analysis._calc_reactions(self, log, combo_tags)
+        _calc_reactions(self, log, combo_tags)
 
         if log:
             print('')     
@@ -2185,7 +2185,7 @@ class FEModel3D():
 
         # Check statics if requested
         if check_statics == True:
-            Analysis._check_statics(self, combo_tags)
+            _check_statics(self, combo_tags)
         
         # Flag the model as solved
         self.solution = 'Linear'
@@ -2215,28 +2215,28 @@ class FEModel3D():
             from scipy.sparse.linalg import spsolve
 
         # Prepare the model for analysis
-        Analysis._prepare_model(self)
+        _prepare_model(self)
         
         # Get the auxiliary list used to determine how the matrices will be partitioned
-        D1_indices, D2_indices, D2 = Analysis._partition_D(self)
+        D1_indices, D2_indices, D2 = _partition_D(self)
 
         # Identify which load combinations have the tags the user has given
-        combo_list = Analysis._identify_combos(self, combo_tags)
+        combo_list = _identify_combos(self, combo_tags)
 
         # Step through each load combination
         for combo in combo_list:
 
             # Get the partitioned global fixed end reaction vector
-            FER1, FER2 = Analysis._partition(self, self.FER(combo.name), D1_indices, D2_indices)
+            FER1, FER2 = _partition(self, self.FER(combo.name), D1_indices, D2_indices)
 
             # Get the partitioned global nodal force vector       
-            P1, P2 = Analysis._partition(self, self.P(combo.name), D1_indices, D2_indices)
+            P1, P2 = _partition(self, self.P(combo.name), D1_indices, D2_indices)
 
             # Run the P-Delta analysis for this load combination
-            Analysis._PDelta_step(self, combo.name, P1, FER1, D1_indices, D2_indices, D2, log, sparse, check_stability, max_iter, True)
+            _PDelta_step(self, combo.name, P1, FER1, D1_indices, D2_indices, D2, log, sparse, check_stability, max_iter, True)
         
         # Calculate reactions
-        Analysis._calc_reactions(self, log, combo_tags)
+        _calc_reactions(self, log, combo_tags)
 
         if log:
             print('')
@@ -2258,10 +2258,10 @@ class FEModel3D():
             from scipy.sparse.linalg import spsolve
 
         # Prepare the model for analysis
-        Analysis._prepare_model(self)
+        _prepare_model(self)
         
         # Get the auxiliary list used to determine how the matrices will be partitioned
-        D1_indices, D2_indices, D2 = Analysis._partition_D(self)
+        D1_indices, D2_indices, D2 = _partition_D(self)
 
         # Identify and tag the primary load combinations the pushover load will be added to
         for combo in self.load_combos.values():
@@ -2277,7 +2277,7 @@ class FEModel3D():
 
         # Identify which load combinations have the tags the user has given
         # TODO: Remove the pushover combo istelf from `combo_list`
-        combo_list = Analysis._identify_combos(self, combo_tags)
+        combo_list = _identify_combos(self, combo_tags)
         combo_list = [combo for combo in combo_list if combo.name != push_combo]
 
         # Step through each load combination
@@ -2302,19 +2302,19 @@ class FEModel3D():
             step_num = 1
             
             # Get the partitioned global fixed end reaction vector
-            FER1, FER2 = Analysis._partition(self, self.FER(combo.name), D1_indices, D2_indices)
+            FER1, FER2 = _partition(self, self.FER(combo.name), D1_indices, D2_indices)
 
             # Get the partitioned global nodal force vector       
-            P1, P2 = Analysis._partition(self, self.P(combo.name), D1_indices, D2_indices)
+            P1, P2 = _partition(self, self.P(combo.name), D1_indices, D2_indices)
 
             # Get the partitioned global fixed end reaction vector for a pushover load increment
-            FER1_push, FER2_push = Analysis._partition(self, self.FER(push_combo), D1_indices, D2_indices)
+            FER1_push, FER2_push = _partition(self, self.FER(push_combo), D1_indices, D2_indices)
 
             # Get the partitioned global nodal force vector for a pushover load increment
-            P1_push, P2_push = Analysis._partition(self, self.P(push_combo), D1_indices, D2_indices)
+            P1_push, P2_push = _partition(self, self.P(push_combo), D1_indices, D2_indices)
 
             # Solve the current load combination without the pushover load applied
-            Analysis._PDelta_step(self, combo.name, P1, FER1, D1_indices, D2_indices, D2, log, sparse, check_stability, max_iter, first_step=True)
+            _PDelta_step(self, combo.name, P1, FER1, D1_indices, D2_indices, D2, log, sparse, check_stability, max_iter, first_step=True)
 
             # Since a P-Delta analysis was just run, we'll need to correct the solution to flag it
             # as 'pushover' instead of 'PDelta'
@@ -2343,7 +2343,7 @@ class FEModel3D():
                     D_temp = self._D
 
                     # Run or rerun the next pushover load step
-                    d_Delta = Analysis._pushover_step(self, combo.name, push_combo, step_num, P1_push, FER1_push, D1_indices, D2_indices, D2, log, sparse, check_stability)
+                    d_Delta = _pushover_step(self, combo.name, push_combo, step_num, P1_push, FER1_push, D1_indices, D2_indices, D2, log, sparse, check_stability)
 
                 # Update nonlinear material member end forces for each member
                 for member in self.members.values():
@@ -2359,7 +2359,7 @@ class FEModel3D():
                 step_num += 1
 
         # Calculate reactions for every primary load combination
-        Analysis._calc_reactions(self, log, combo_tags=['primary'])
+        _calc_reactions(self, log, combo_tags=['primary'])
 
         if log:
             print('')

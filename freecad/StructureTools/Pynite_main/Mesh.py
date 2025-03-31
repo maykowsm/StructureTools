@@ -1,6 +1,6 @@
-from Node3D import Node3D
-from Quad3D import Quad3D
-from Plate3D import Plate3D
+from .Node3D import Node3D
+from .Quad3D import Quad3D
+from .Plate3D import Plate3D
 from math import pi, sin, cos, ceil, isclose
 from bisect import bisect
 

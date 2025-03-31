@@ -2,8 +2,8 @@
 from numpy import zeros, array, add, subtract, matmul, insert, cross, divide
 from numpy.linalg import inv
 from math import isclose
-import FixedEndReactions
-from LoadCombo import LoadCombo
+from .FixedEndReactions import FER_PtLoad, FER_Moment, FER_LinLoad, FER_AxialPtLoad, FER_AxialLinLoad, FER_Torque
+from .LoadCombo import LoadCombo
 
 # %%
 class Spring3D():

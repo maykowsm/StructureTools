@@ -1,4 +1,4 @@
-from BeamSegZ import BeamSegZ
+from .BeamSegZ import BeamSegZ
 
 # %%
 class BeamSegY(BeamSegZ):

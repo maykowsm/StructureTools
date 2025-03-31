@@ -2,7 +2,7 @@ from math import isclose
 from numpy import average
 import io
 
-from FEModel3D import FEModel3D
+from .FEModel3D import FEModel3D
 from prettytable import PrettyTable
 
 import matplotlib.pyplot as plt

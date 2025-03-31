@@ -1,7 +1,7 @@
 # Matrix Structural Analysis, 2nd Ed, Problem 8.6
 
 import FEModel3D
-from Section import SteelSection
+from .Section import SteelSection
 
 # Create the model
 plastic_beam = FEModel3D()

@@ -16,9 +16,13 @@ def show_error_message(msg):
 class Diagram:
 	def __init__(self, obj, calc):
 		obj.Proxy = self
-		obj.addProperty("App::PropertyLink", "ObjectBase", "Diagram", "elementos para a analise").ObjectBase = calc
+		obj.addProperty("App::PropertyLink", "ObjectBase", "Base", "elementos para a analise").ObjectBase = calc
+
+		obj.addProperty("App::PropertyColor", "Color", "Diagram", "elementos para a analise").Color = (255,0,0,0)
+		obj.addProperty("App::PropertyInteger", "Transparency", "Diagram", "elementos para a analise").Transparency = 70		
 		obj.addProperty("App::PropertyInteger", "FontHeight", "Diagram", "Tamanho da fonte no diagrama").FontHeight = 100
 		obj.addProperty("App::PropertyInteger", "Precision", "Diagram", "precisão de casas decimais").Precision = 2
+		obj.addProperty("App::PropertyBool", "DrawText", "Diagram", "precisão de casas decimais").DrawText = True
 
 		obj.addProperty("App::PropertyBool", "MomentZ", "DiagramMoment", "Ver diagrama de momento em Z").MomentZ = False
 		obj.addProperty("App::PropertyBool", "MomentY", "DiagramMoment", "Ver diagrama de momento em Y").MomentY = False
@@ -187,7 +191,7 @@ class Diagram:
 
 
 	# Gera o diagrama da matriz passada como argumento
-	def makeDiagram(self, matrix,nodes, members, orderMembers, nPoints, rotacao, escale, fontHeight, precision):
+	def makeDiagram(self, matrix,nodes, members, orderMembers, nPoints, rotacao, escale, fontHeight, precision, drawText):
 		
 		# e = 1e-11
 		listDiagram = []
@@ -208,7 +212,7 @@ class Diagram:
 			dy = p2[1] - p1[1]
 			dz = p2[2] - p1[2]
 			element = Part.makeCompound(faces)
-			element = Part.makeCompound([element] + texts)
+			if drawText: element = Part.makeCompound([element] + texts) 
 
 			rot = FreeCAD.Rotation(FreeCAD.Vector(1,0,0), rotacao)
 			element.Placement = FreeCAD.Placement(FreeCAD.Vector(0,0,0), rot)
@@ -241,22 +245,22 @@ class Diagram:
 
 		listDiagram = []
 		if obj.MomentZ:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 0, obj.ScaleMoment, obj.FontHeight, obj.Precision)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 0, obj.ScaleMoment, obj.FontHeight, obj.Precision, obj.DrawText)
 		
 		if obj.MomentY:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentY),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 90, obj.ScaleMoment, obj.FontHeight, obj.Precision)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentY),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 90, obj.ScaleMoment, obj.FontHeight, obj.Precision, obj.DrawText)
 		
 		if obj.ShearY:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearY),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 0, obj.ScaleShear, obj.FontHeight, obj.Precision)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearY),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 0, obj.ScaleShear, obj.FontHeight, obj.Precision, obj.DrawText)
 
 		if obj.ShearZ:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 90, obj.ScaleShear, obj.FontHeight, obj.Precision)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 90, obj.ScaleShear, obj.FontHeight, obj.Precision, obj.DrawText)
 		
 		if obj.Torque:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.Torque),nodes, members, orderMembers, obj.ObjectBase.NumPointsTorque, 0, obj.ScaleTorque, obj.FontHeight, obj.Precision)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.Torque),nodes, members, orderMembers, obj.ObjectBase.NumPointsTorque, 0, obj.ScaleTorque, obj.FontHeight, obj.Precision, obj.DrawText)
 		
 		if obj.AxialForce:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.AxialForce),nodes, members, orderMembers, obj.ObjectBase.NumPointsAxial, 0, obj.ScaleAxial, obj.FontHeight, obj.Precision)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.AxialForce),nodes, members, orderMembers, obj.ObjectBase.NumPointsAxial, 0, obj.ScaleAxial, obj.FontHeight, obj.Precision, obj.DrawText)
 		
 		if not listDiagram:
 			shape = Part.Shape()
@@ -268,10 +272,10 @@ class Diagram:
 		# Estilização
 		obj.ViewObject.LineWidth = 1
 		obj.ViewObject.PointSize = 1
-		obj.ViewObject.LineColor = (255,0,0)
-		obj.ViewObject.PointColor = (255,0,0)
-		obj.ViewObject.ShapeAppearance = (FreeCAD.Material(DiffuseColor=(1.00,0.00,0.00),AmbientColor=(0.33,0.33,0.33),SpecularColor=(0.53,0.53,0.53),EmissiveColor=(0.00,0.00,0.00),Shininess=(0.90),Transparency=(0.00),))
-		obj.ViewObject.Transparency = 70
+		obj.ViewObject.LineColor = (int(obj.Color[0]*255),int(obj.Color[1]*255),int(obj.Color[2]*255))
+		obj.ViewObject.PointColor = (int(obj.Color[0]*255),int(obj.Color[1]*255),int(obj.Color[2]*255))
+		obj.ViewObject.ShapeAppearance = (FreeCAD.Material(DiffuseColor=obj.Color,AmbientColor=(0.33,0.33,0.33),SpecularColor=(0.53,0.53,0.53),EmissiveColor=(0.00,0.00,0.00),Shininess=(0.90),Transparency=(0.00),))
+		obj.ViewObject.Transparency = obj.Transparency
 
 
 	def onChanged(self,obj,Parameter):

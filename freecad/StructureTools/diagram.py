@@ -210,7 +210,6 @@ class Diagram:
 			element = Part.makeCompound(faces)
 			element = Part.makeCompound([element] + texts)
 
-			print(members[nameMember]['RotationSection'])
 			rot = FreeCAD.Rotation(FreeCAD.Vector(1,0,0), rotacao)
 			element.Placement = FreeCAD.Placement(FreeCAD.Vector(0,0,0), rot)
 			element = self.rotate(element, FreeCAD.Vector(1,0,0), FreeCAD.Vector(abs(dx), abs(dy), abs(dz)))
@@ -262,10 +261,8 @@ class Diagram:
 		if not listDiagram:
 			shape = Part.Shape()
 		else:	
-			print(listDiagram)
 			shape = Part.makeCompound(listDiagram)
 
-		print(shape)
 		obj.Shape = shape
 
 		# Estilização

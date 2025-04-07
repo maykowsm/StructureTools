@@ -175,7 +175,7 @@ class Diagram:
 		listWire = []
 		for i, value in enumerate(values):
 			offset = 0
-			valueString = abs(listMatrix[i])
+			valueString = listMatrix[i] * -1
 			string = f"{valueString:.{precision}e}"
 			x = dist * i
 			y = value + offset if value > 0 else value - offset

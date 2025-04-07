@@ -99,7 +99,9 @@ class Calc:
 				listMembers[element.Name + '_' + str(i)] = {
 					'nodes': [str(n1), str(n2)],
 					'material': element.MaterialMember.Name,
-					'section': element.SectionMember.Name}
+					'section': element.SectionMember.Name,
+					'trussMember': element.TrussMember
+					}
 		
 		return listMembers
 
@@ -114,7 +116,13 @@ class Calc:
 	def setMembers(self, model, members_map,selfWeight):
 		for memberName in list(members_map):			
 			model.add_member(memberName, members_map[memberName]['nodes'][0] , members_map[memberName]['nodes'][1], members_map[memberName]['material'], members_map[memberName]['section'])
-			if selfWeight : model.add_member_self_weight('FY', -1) #Se for considerado o peso proprio nos elementos de barra
+			
+			#Considera o peso proprio nos elementos de barra
+			if selfWeight : model.add_member_self_weight('FY', -1) 
+
+			#libera as rotações na extremidades do elemento a fim de emular ocomportamento de barras de treliça
+			if members_map[memberName]['trussMember']: model.def_releases(memberName, Dxi=False, Dyi=False, Dzi=False, Rxi=False, Ryi=True, Rzi=True, Dxj=False, Dyj=False, Dzj=False, Rxj=False, Ryj=True, Rzj=True)
+		
 		return model
 
 	# Cria os carregamentos

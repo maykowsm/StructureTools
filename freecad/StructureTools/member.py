@@ -31,6 +31,7 @@ class CommandMember():
             selection.addProperty('App::PropertyLink', 'MaterialMember', 'Structure','Member material')
             selection.addProperty('App::PropertyLink', 'SectionMember', 'Structure','Member section')
             selection.addProperty('App::PropertyAngle', 'RotationSection', 'Structure','Member section rotation')
+            selection.addProperty('App::PropertyBool', 'TrussMember', 'Structure','Define como membro de treliça').TrussMember = False
         FreeCAD.ActiveDocument.recompute()        
 
         return

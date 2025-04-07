@@ -30,6 +30,7 @@ class Calc:
 
 		obj.addProperty("App::PropertyStringList", "NameMembers", "Calc", "name of structure members")
 		obj.addProperty("App::PropertyVectorList", "Nodes", "Calc", "nós")
+		obj.addProperty("App::PropertyBool", "selfWeight", "Calc", "Considerar peso proprio.").selfWeight = False
 
 		obj.addProperty("App::PropertyStringList", "MomentY", "ResultMoment", "momento em Y local")
 		obj.addProperty("App::PropertyStringList", "MomentZ", "ResultMoment", "momento em Z local")
@@ -37,15 +38,15 @@ class Calc:
 		obj.addProperty("App::PropertyFloatList", "MinMomentZ", "ResultMoment", "momento minimo em Z")
 		obj.addProperty("App::PropertyFloatList", "MaxMomentY", "ResultMoment", "momento maximo em Y")
 		obj.addProperty("App::PropertyFloatList", "MaxMomentZ", "ResultMoment", "momento maximo em Z")
-		obj.addProperty("App::PropertyInteger", "NumPointsMoment", "NumPoints", "Presizão dos gráficos").NumPointsMoment = 10
+		obj.addProperty("App::PropertyInteger", "NumPointsMoment", "NumPoints", "Presizão dos gráficos").NumPointsMoment = 5
 
 		obj.addProperty("App::PropertyStringList", "AxialForce", "ResultAxial", "força axial")
-		obj.addProperty("App::PropertyInteger", "NumPointsAxial", "NumPoints", "Presizão dos gráficos").NumPointsAxial = 10
+		obj.addProperty("App::PropertyInteger", "NumPointsAxial", "NumPoints", "Presizão dos gráficos").NumPointsAxial = 3
 		
 		obj.addProperty("App::PropertyStringList", "Torque", "ResultTorque", "torque no elemento")
 		obj.addProperty("App::PropertyFloatList", "MinTorque", "ResultTorque", "torque minimo")
 		obj.addProperty("App::PropertyFloatList", "MaxTorque", "ResultTorque", "torque maximo")
-		obj.addProperty("App::PropertyInteger", "NumPointsTorque", "NumPoints", "Presizão dos gráficos").NumPointsTorque = 10
+		obj.addProperty("App::PropertyInteger", "NumPointsTorque", "NumPoints", "Presizão dos gráficos").NumPointsTorque = 3
 		
 		obj.addProperty("App::PropertyStringList", "ShearY", "ResultShear", "cortante")
 		obj.addProperty("App::PropertyFloatList", "MinShearY", "ResultShear", "cortante minimo")
@@ -53,7 +54,7 @@ class Calc:
 		obj.addProperty("App::PropertyStringList", "ShearZ", "ResultShear", "cortante")
 		obj.addProperty("App::PropertyFloatList", "MinShearZ", "ResultShear", "cortante minimo")
 		obj.addProperty("App::PropertyFloatList", "MaxShearZ", "ResultShear", "cortante maximo")
-		obj.addProperty("App::PropertyInteger", "NumPointsShear", "NumPoints", "Presizão dos gráficos").NumPointsShear = 10
+		obj.addProperty("App::PropertyInteger", "NumPointsShear", "NumPoints", "Presizão dos gráficos").NumPointsShear = 4
 
 		obj.addProperty("App::PropertyStringList", "DeflectionY", "ResultDeflection", "Deslocamento em y")
 		obj.addProperty("App::PropertyFloatList", "MinDeflectionY", "ResultDeflection", "Deslocamento minimo em y")
@@ -61,7 +62,7 @@ class Calc:
 		obj.addProperty("App::PropertyStringList", "DeflectionZ", "ResultDeflection", "Deslocamento em Z")
 		obj.addProperty("App::PropertyFloatList", "MinDeflectionZ", "ResultDeflection", "Deslocamento minimo em Z")
 		obj.addProperty("App::PropertyFloatList", "MaxDeflectionZ", "ResultDeflection", "Deslocamento máximo em Z")
-		obj.addProperty("App::PropertyInteger", "NumPointsDeflection", "NumPoints", "Presizão dos gráficos").NumPointsDeflection = 10
+		obj.addProperty("App::PropertyInteger", "NumPointsDeflection", "NumPoints", "Presizão dos gráficos").NumPointsDeflection = 4
 
 
 	#  Mapeia os nós da estrutura, (inverte o eixo y e z para adequação as coordenadas do sover)
@@ -110,10 +111,10 @@ class Calc:
 		return model
 
 	# Cria os membros no modelo do solver
-	def setMembers(self, model, members_map):
+	def setMembers(self, model, members_map,selfWeight):
 		for memberName in list(members_map):			
 			model.add_member(memberName, members_map[memberName]['nodes'][0] , members_map[memberName]['nodes'][1], members_map[memberName]['material'], members_map[memberName]['section'])
-
+			if selfWeight : model.add_member_self_weight('FY', -1) #Se for considerado o peso proprio nos elementos de barra
 		return model
 
 	# Cria os carregamentos
@@ -232,7 +233,7 @@ class Calc:
 
 		model = self.setMaterialAndSections(model, lines, obj.LengthUnit, obj.ForceUnit)
 		model = self.setNodes(model, nodes_map)
-		model = self.setMembers(model, members_map)
+		model = self.setMembers(model, members_map, obj.selfWeight)
 		model = self.setLoads(model, loads, nodes_map, obj.ForceUnit, obj.LengthUnit)
 		model = self.setSuports(model, suports, nodes_map, obj.LengthUnit)
 

@@ -269,7 +269,8 @@ class Diagram:
 		else: # caso haja objetos celecionados faz o filtro no nome destes objetos
 			listaNames = []
 			for element in obj.ObjectBaseElements:
-				for memberName in range(len(element[1])):
+				listMemberNames = [int(name.split('Edge')[1])-1 for name in element[1]]
+				for memberName in listMemberNames:
 					name = element[0].Name +'_'+ str(memberName)
 					memberIndex = obj.ObjectBaseCalc.NameMembers.index(name)
 					listaNames.append((memberIndex, name))

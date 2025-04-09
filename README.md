@@ -61,10 +61,14 @@ Please consider supporting the project so I can dedicate more time to it: [  Pat
 
 ['numpy','scipy','prettytable','PyniteFEA']
 
-
-
-
 ## Maintainer
 
 Maykow Menezes
+
+[linkedin](https://www.linkedin.com/in/engmaykowmenezes/)
+
+[X old twitter](https://x.com/StructureTools)
+
+Telegram: @Eng_Maykow_Menezes
+
 eng.maykowmenezes@gmail.com

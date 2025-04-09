@@ -1,9 +1,12 @@
 # StructureTools
 
-![ ] (https://s3.amazonaws.com/assets.apoia.se/campaigns/65f2042ce6eb334f82dcee15%7C67b62e77030f0b5f94f858a2/user-campaign-about-cover%7Capoiasecapa-20250219_21163104.png)
+![](https://github.com/maykowsm/StructureTools/blob/main/freecad/StructureTools/resources/ui/img/img-1.png)
+
 This is a workbench for FreeCAD that implements a set of tools for modeling and analyzing structural stresses, similar to analysis software such as SAP2000, Cype3D, SkyCiv, EdiLus, among many others.
+
 The goal is to provide engineers and engineering students with a powerful and easy-to-use open source tool. Fully integrated with the existing tools in FreeCAD.
-Note: The tools developed are limited to modeling, calculation and analysis of stresses in structural elements. The focus is not on developing tools for dimensioning these elements. The dimensioning will be handled by another workbench that I am developing in parallel to this one.
+
+**Note:** The tools developed are limited to modeling, calculation and analysis of stresses in structural elements. The focus is not on developing tools for dimensioning these elements. The dimensioning will be handled by another workbench that I am developing in parallel to this one.
 
 ## Installing
 
@@ -11,13 +14,13 @@ At the moment, the StructureTools workbench can only be installed manually. I am
 
 To manually install the workbench, follow these steps:
 
-1 – Click on the “Code” button and then on Download ZIP.
+1. Click on the “Code” button and then on Download ZIP.
 
-2 – Unzip the ZIP file to your computer.
+2. Unzip the ZIP file to your computer.
 
-3 – Rename the extracted folder to “StructureTools.”
+3. Rename the extracted folder to “StructureTools.”
 
-4 – Copy the renamed folder to the Mod folder inside your FreeCAD default installation folder.
+4. Copy the renamed folder to the Mod folder inside your FreeCAD default installation folder.
 
 For more details on manual installation, watch the video:
 https://www.youtube.com/watch?v=HeYGVXhw31A
@@ -35,7 +38,7 @@ The StructureTools workbench is still under development and is constantly changi
 
 **Material** - Defines the physical properties of the material of the structural elements.
 
-**Distributed Load **- defines an external linear load distributed on a member of the structure, capable of modeling uniformly distributed loads, triangular and trapezoidal loads, definition in the global axis.
+**Distributed Load** - defines an external linear load distributed on a member of the structure, capable of modeling uniformly distributed loads, triangular and trapezoidal loads, definition in the global axis.
 
 **Nodal Load** – defines an external force acting on a node of the structure, defined on the global axis.
 
@@ -52,7 +55,7 @@ You can see more about the tools in these videos:
 You can follow the development of the project here: https://github.com/users/maykowsm/projects/1/views/1
 I'm trying to write proper documentation for the FreeCAD Wiki, if you want to help me, you'll be welcome.
 
-Please consider supporting the project so I can dedicate more time to it: [Patreon] (https://patreon.com/StructureTools), [ApoiaSe] ( https://apoia.se/structuretools )
+Please consider supporting the project so I can dedicate more time to it: [  Patreon  ](https://patreon.com/StructureTools), [  ApoiaSe  ](  https://apoia.se/structuretools  )
 
 ## Dependencies
 

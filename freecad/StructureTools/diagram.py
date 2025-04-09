@@ -14,9 +14,15 @@ def show_error_message(msg):
 	msg_box.exec_()
 
 class Diagram:
-	def __init__(self, obj, calc):
+	def __init__(self, obj, objCalc, listSelection):
+		#Gera a lista de membros selecionados
+		
+
+
 		obj.Proxy = self
-		obj.addProperty("App::PropertyLink", "ObjectBase", "Base", "elementos para a analise").ObjectBase = calc
+		obj.addProperty("App::PropertyLink", "ObjectBaseCalc", "Base", "elementos para a analise").ObjectBaseCalc = objCalc
+		obj.addProperty("App::PropertyLinkSubList", "ObjectBaseElements", "Base", "elementos para a analise").ObjectBaseElements = self.getMembers(listSelection)
+		
 
 		obj.addProperty("App::PropertyColor", "Color", "Diagram", "elementos para a analise").Color = (255,0,0,0)
 		obj.addProperty("App::PropertyInteger", "Transparency", "Diagram", "elementos para a analise").Transparency = 70		
@@ -39,6 +45,27 @@ class Diagram:
 		obj.addProperty("App::PropertyBool", "AxialForce", "DiagramAxial", "Ver diagrama de força normal").AxialForce = False
 		obj.addProperty("App::PropertyFloat", "ScaleAxial", "DiagramAxial", "Escala do diagrama de força normal").ScaleAxial = 1
 	
+
+
+	# Pega os membros que deverão se plotados os seus diagramas
+	def getMembers(self, listSelection):
+		listMembers = []
+
+		if listSelection != []: # Caso exista selecção de membros
+			for selection in listSelection:
+				member = (selection.Object, selection.SubElementNames)
+				listMembers.append(member)
+		
+		else: #Caso não exista seleção de membros todos eles serão selecionados automaticamente
+			objects = FreeCAD.ActiveDocument.Objects
+			lines = list(filter(lambda object: 'Wire' in object.Name or 'Line' in object.Name, objects))
+			members = list(filter(lambda line: 'MaterialMember' in line.PropertiesList, lines))
+
+			for member in members:
+				listSubObjects = [f'Edge{i+1}' for i in range(len(member.Shape.Edges))]
+				listMembers.append((member, listSubObjects))
+		
+		return listMembers
 
 	# Gera uma matriz baseado em umdos parâmetros do calc
 	def getMatrix(self, param):
@@ -195,7 +222,7 @@ class Diagram:
 		
 		# e = 1e-11
 		listDiagram = []
-		for i, nameMember in enumerate(orderMembers):
+		for i, nameMember in orderMembers:
 			p1 = nodes[int(members[nameMember]['nodes'][0])]
 			p2 = nodes[int(members[nameMember]['nodes'][1])]
 			length = ((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2 + (p2[2] - p1[2])**2)**0.5
@@ -235,32 +262,47 @@ class Diagram:
 		
 		return listDiagram
 
+	def filterMembersSelected(self, obj):
+		if obj.ObjectBaseElements == []: # se não existir objetos celecionados retorna to d a alista de objetos
+			return list(enumerate(obj.ObjectBaseCalc.NameMembers))
+		
+		else: # caso haja objetos celecionados faz o filtro no nome destes objetos
+			listaNames = []
+			for element in obj.ObjectBaseElements:
+				for memberName in range(len(element[1])):
+					name = element[0].Name +'_'+ str(memberName)
+					memberIndex = obj.ObjectBaseCalc.NameMembers.index(name)
+					listaNames.append((memberIndex, name))
+			
+			return listaNames
+
+
 
 
 	def execute(self, obj):
-		elements = list(filter(lambda element: 'Line' in element.Name or 'Wire' in element.Name,  obj.ObjectBase.ListElements))
+		elements = list(filter(lambda element: 'Line' in element.Name or 'Wire' in element.Name,  obj.ObjectBaseCalc.ListElements))
 		nodes = self.mapNodes(elements)
 		members = self.mapMembers(elements, nodes)
-		orderMembers = obj.ObjectBase.NameMembers
+		orderMembers = self.filterMembersSelected(obj)
 
 		listDiagram = []
 		if obj.MomentZ:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 0, obj.ScaleMoment, obj.FontHeight, obj.Precision, obj.DrawText)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBaseCalc.MomentZ),nodes, members, orderMembers, obj.ObjectBaseCalc.NumPointsMoment, 0, obj.ScaleMoment, obj.FontHeight, obj.Precision, obj.DrawText)
 		
 		if obj.MomentY:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.MomentY),nodes, members, orderMembers, obj.ObjectBase.NumPointsMoment, 90, obj.ScaleMoment, obj.FontHeight, obj.Precision, obj.DrawText)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBaseCalc.MomentY),nodes, members, orderMembers, obj.ObjectBaseCalc.NumPointsMoment, 90, obj.ScaleMoment, obj.FontHeight, obj.Precision, obj.DrawText)
 		
 		if obj.ShearY:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearY),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 0, obj.ScaleShear, obj.FontHeight, obj.Precision, obj.DrawText)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBaseCalc.ShearY),nodes, members, orderMembers, obj.ObjectBaseCalc.NumPointsShear, 0, obj.ScaleShear, obj.FontHeight, obj.Precision, obj.DrawText)
 
 		if obj.ShearZ:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.ShearZ),nodes, members, orderMembers, obj.ObjectBase.NumPointsShear, 90, obj.ScaleShear, obj.FontHeight, obj.Precision, obj.DrawText)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBaseCalc.ShearZ),nodes, members, orderMembers, obj.ObjectBaseCalc.NumPointsShear, 90, obj.ScaleShear, obj.FontHeight, obj.Precision, obj.DrawText)
 		
 		if obj.Torque:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.Torque),nodes, members, orderMembers, obj.ObjectBase.NumPointsTorque, 0, obj.ScaleTorque, obj.FontHeight, obj.Precision, obj.DrawText)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBaseCalc.Torque),nodes, members, orderMembers, obj.ObjectBaseCalc.NumPointsTorque, 0, obj.ScaleTorque, obj.FontHeight, obj.Precision, obj.DrawText)
 		
 		if obj.AxialForce:
-			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBase.AxialForce),nodes, members, orderMembers, obj.ObjectBase.NumPointsAxial, 0, obj.ScaleAxial, obj.FontHeight, obj.Precision, obj.DrawText)
+			listDiagram += self.makeDiagram(self.getMatrix(obj.ObjectBaseCalc.AxialForce),nodes, members, orderMembers, obj.ObjectBaseCalc.NumPointsAxial, 0, obj.ScaleAxial, obj.FontHeight, obj.Precision, obj.DrawText)
 		
 		if not listDiagram:
 			shape = Part.Shape()
@@ -387,12 +429,14 @@ class CommandDiagram():
 				"ToolTip" : "Gera os diagramas dos esforços"}
 	
 	def Activated(self):
-		objectBase = FreeCADGui.Selection.getSelection()[0]
-		if 'Calc' in objectBase.Name:
+		objCalc = FreeCADGui.Selection.getSelectionEx()[0].Object
+		listSelects = list(filter(lambda select: 'Wire' in select.Object.Name or 'Line' in select.Object.Name, FreeCADGui.Selection.getSelectionEx()))
+		
+		if 'Calc' in objCalc.Name: #valida se o primeiro elemento de fato é um calc
 
 			doc = FreeCAD.ActiveDocument
 			obj = doc.addObject("Part::FeaturePython", "Diagram")
-			Diagram(obj, objectBase)
+			Diagram(obj, objCalc, listSelects)
 			ViewProviderDiagram(obj.ViewObject) 
 
 		else:

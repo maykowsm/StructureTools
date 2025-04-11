@@ -1,5 +1,5 @@
 import FreeCAD, FreeCADGui, Part, math, os
-from PySide2 import QtWidgets
+from PySide6 import QtWidgets
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "resources")
 pathFont = os.path.join(os.path.dirname(__file__), "resources/fonts/ARIAL.TTF")

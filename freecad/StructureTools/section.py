@@ -1,6 +1,6 @@
 import FreeCAD, App, FreeCADGui, Part, os, math, copy
-from PySide2 import QtWidgets
-from PySide2.QtGui import QPixmap
+from PySide6 import QtWidgets
+from PySide6.QtGui import QPixmap
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "resources")
 # path_ui = str(os.path.dirname(__file__))+'/resources/ui/sectionGui.ui'

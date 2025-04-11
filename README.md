@@ -1,4 +1,4 @@
-# StructureTools
+# StructureTools - alpha
 
 ![](https://github.com/maykowsm/StructureTools/blob/main/freecad/StructureTools/resources/ui/img/img-1.png)
 

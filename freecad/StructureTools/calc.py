@@ -2,6 +2,9 @@ import FreeCAD, App, FreeCADGui, Part, os, math
 from PySide import QtWidgets
 import subprocess
 
+from .src.tools.msg_error import show_error_message
+
+
 ICONPATH = os.path.join(os.path.dirname(__file__), "resources")
 
 from .Pynite_main.FEModel3D import FEModel3D
@@ -12,13 +15,6 @@ from .Pynite_main.FEModel3D import FEModel3D
 # 	print('Instalando dependencias')
 # 	subprocess.check_call(["pip", "install", "PyniteFEA"])
 
-def show_error_message(msg):
-    msg_box = QtWidgets.QMessageBox()
-    msg_box.setIcon(QtWidgets.QMessageBox.Critical)  #Ícone de erro
-    msg_box.setWindowTitle("Erro")
-    msg_box.setText(msg)
-    msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok)
-    msg_box.exec_()
 
 class Calc:
 	def __init__(self, obj, elements):

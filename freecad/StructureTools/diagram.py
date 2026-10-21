@@ -1,17 +1,12 @@
 import FreeCAD, FreeCADGui, Part, math, os
 from PySide import QtWidgets
 
+from .src.tools.msg_error import show_error_message
+
 ICONPATH = os.path.join(os.path.dirname(__file__), "resources")
 pathFont = os.path.join(os.path.dirname(__file__), "resources/fonts/ARIAL.TTF")
 # pathFont = os.path.join(os.path.dirname(__file__), "ARIAL.TTF")
 
-def show_error_message(msg):
-	msg_box = QtWidgets.QMessageBox()
-	msg_box.setIcon(QtWidgets.QMessageBox.Critical)  #Ícone de erro
-	msg_box.setWindowTitle("Erro")
-	msg_box.setText(msg)
-	msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok)
-	msg_box.exec_()
 
 class Diagram:
 	def __init__(self, obj, objCalc, listSelection):

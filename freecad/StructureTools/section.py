@@ -2,24 +2,17 @@ import FreeCAD, App, FreeCADGui, Part, os, math, copy
 from PySide import QtWidgets
 from PySide.QtGui import QPixmap
 
+from .src.tools.msg_error import show_error_message
+
 ICONPATH = os.path.join(os.path.dirname(__file__), "resources")
 # path_ui = str(os.path.dirname(__file__))+'/resources/ui/sectionGui.ui'
-
-def show_error_message(msg):
-    msg_box = QtWidgets.QMessageBox()
-    msg_box.setIcon(QtWidgets.QMessageBox.Critical)  # Ícone de erro
-    msg_box.setWindowTitle("Erro")
-    msg_box.setText(msg)
-    msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok)
-    msg_box.exec_()
 
 
 class Section:
     def __init__(self, obj, selection):
-
-        # Define os objetos pré celecionados
-        objectSelected = (selection[0].Object, selection[0].SubElementNames[0]) if len(selection) > 0 else ()
-            
+        # Define os objetos pré selecionados
+        objectSelected = self.getface(selection)
+        
         
         obj.Proxy = self
         obj.addProperty("App::PropertyLinkSub", "ObjectBase", "Base", "Object base").ObjectBase = objectSelected
@@ -35,7 +28,34 @@ class Section:
         obj.addProperty("App::PropertyBool", "ViewFullSection", "DrawSection", "Ver a seção no membro").ViewFullSection = False
         
 
+    def getface(self, selection):
+    # Define os objetos pré selecionados
+        if len(selection) > 0:
+            # verifica se o objeto selecionado possue uma face
+            obj_base = selection[0].Object
+            shape = getattr(obj_base, "Shape", None)
 
+            if shape is None or not shape.Faces:
+                show_error_message("O objeto selecionado não possui faces.")
+                return
+
+            # Usa a face selecionada; se nenhuma face foi selecionada, usa a primeira.
+            face_name = next(
+                (
+                    name for name in selection[0].SubElementNames
+                    if getattr(obj_base.getSubObject(name), "ShapeType", None) == "Face"
+                ),
+                "Face1",
+                )
+
+            # objectSelected = (obj_base, [face_name]) 
+            return (obj_base, [face_name]) 
+
+        else:
+            show_error_message("Selecione um objeto com uma face para criar a seção.")
+            return ()
+
+                
     # Faz a rotação da face para que a normal conicida com o vetor passado como argumento
     def rotate(self, face, normal, position = FreeCAD.Vector(0,0,0)):
         normal.normalize()
